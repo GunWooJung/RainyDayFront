@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity" >
+
+    <Button
+        android:id="@+id/temp_login"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="로그인화면" />
+
+    <Button
+        android:id="@+id/temp_register"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="회원가입화면" />
+
+    <Button
+        android:id="@+id/temp_enroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="일정등록화면" />
+
+    <Button
+        android:id="@+id/temp_main"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="메인페이지 화면" />
+
+
+</LinearLayout>
