@@ -22,13 +22,22 @@ import com.google.gson.JsonParser;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+
 import java.net.URL;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 import cap.project.rainyday.data.model.Route;
-import cap.project.rainyday.data.model.Schedule;
 
-public class RouteActivity extends AppCompatActivity  {
+import cap.project.rainyday.weather.Location;
+import cap.project.rainyday.weather.MidTermWeather;
+import cap.project.rainyday.weather.ShortTermForeacast;
+import cap.project.rainyday.weather.ShortTermWeather;
+import cap.project.rainyday.weather.midTermForecast;
+
+public class RouteActivity extends AppCompatActivity {
 
     private ArrayList<String> routeList;
     private ArrayAdapter<String> adapter;
@@ -36,6 +45,7 @@ public class RouteActivity extends AppCompatActivity  {
 
     private ArrayList<Route> routeListFromBackend;
     private long scheduleId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,6 +74,7 @@ public class RouteActivity extends AppCompatActivity  {
         }
         return super.onOptionsItemSelected(item);
     }
+
     protected void onResume() {
         super.onResume();
         routeList = new ArrayList<>();
@@ -76,7 +87,7 @@ public class RouteActivity extends AppCompatActivity  {
             @Override
             public void run() {
                 try {
-                    String url = "http://ec2-54-144-194-174.compute-1.amazonaws.com/route/load?scheduleId="+scheduleId;
+                    String url = "http://ec2-54-144-194-174.compute-1.amazonaws.com/route/load?scheduleId=" + scheduleId;
                     //String url = "http://192.168.219.153:80/schedule/load?userId="+userId;;
                     URL obj = new URL(url);
                     HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -157,20 +168,86 @@ public class RouteActivity extends AppCompatActivity  {
                             route.setDestNy(destNy);
                             route.setDestRegioncode(destRegioncode);
                             routeListFromBackend.add(route);
-                            routeList.add(route.toString());
-                        }
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                adapter.notifyDataSetChanged();
+                            routeList.add("로딩 중");
+
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    adapter.notifyDataSetChanged();
+                                }
+                            });
+
+                            String s[] = new String[2];
+                            s[0] = "";
+                            s[1] = "";
+                            for (int k = 0; k < 2; k++) {
+
+
+                                LocalDateTime now = LocalDateTime.now();
+                                LocalDateTime dateTime;
+                                Location location;
+                                if(k==0) {
+                                    dateTime = LocalDateTime.of(departYear, departMonth, departDay, departHour, departMinute);
+                                    location = new Location(departNx,departNy,departRegioncode);
+                                }
+                                else{
+                                    dateTime = LocalDateTime.of(destYear, destMonth, destDay, destHour, destMinute);
+                                    location = new Location(destNx,destNy,destRegioncode);
+                                }
+                                Duration duration = Duration.between(now, dateTime);
+                                long daysDifference = duration.toDays(); // Day 차이
+                                try {
+                                    if (dateTime.isAfter(now)) {
+                                        if (daysDifference >= 0 && daysDifference <= 2) {
+                                            ShortTermForeacast weather_f = new ShortTermForeacast(location);
+                                            ShortTermWeather weather_s[] = weather_f.getWeather();
+                                            //저는 for문으로 모두 출력했지만 첫번째 인덱스의 시간과 날짜를 보고 몇시간 후인지 전인지 보고 인덱스를 더하고 몇일 뒤인지에 따라 24만큼 인덱스를 더해서 빠르게 접근가능합니다
+                                            for (ShortTermWeather weather : weather_s) {
+                                                s[k] += "날짜 : ";
+                                                s[k]  += weather.fcst.format(DateTimeFormatter.ofPattern("ddHHmm"));
+                                                s[k]  += "TMP 온도 : ";
+                                                s[k]  += weather.tmp;
+                                                s[k]  += ", POP 강수확률 : ";
+                                                s[k]  += weather.pop;
+                                                s[k]  += ", PCP 강수량 : ";
+                                                s[k]  += weather.pcp;
+                                                s[k]  += "\n";
+                                            }
+                                        } else if (daysDifference >= 3 && daysDifference <= 10) {
+                                            midTermForecast midTerm = new midTermForecast(LocalDateTime.now(), location);
+                                            //중기 예보의 경우 0600 1800에만 발표
+                                            // midTerm.getWeather_midTerm();
+                                            MidTermWeather weather_m[] = midTerm.getWeather_midTerm_get_all();
+                                            //0 인덱스부터 3일후 7인덱스가 10일 후 입니다
+                                            for (int j = 0; j < 8; ++j) {
+                                                s[k]  += (j + 3) + "일 후 오전 강수확률 :" + weather_m[j].rnStAm+"\n";
+                                                s[k]  += (j + 3) + "일 후 오전 날씨 :" + weather_m[j].wfAm+"\n";
+                                                s[k]  += (j + 3) + "일 후 오후 강수확률 :" + weather_m[j].rnStPm+"\n";
+                                                s[k]  += (j + 3) + "일 후 오후 날씨 :" + weather_m[j].wfPm;
+                                            }
+                                        } else {
+                                            s[k]  = "10일 이후 날씨는 제공되지 않습니다.";
+                                        }
+                                    } else {
+                                        s[k]  = "현재 시간보다 이전입니다.";
+                                    }
+                                } catch (Exception e) {
+                                    Log.d("abc", e.toString());
+                                    s[k]  = "해당 장소를 조회할 수 없습니다.";
+                                }
+
                             }
-                        });
-                    } else {
-                        // 응답이 200이 아닌 경우 에러 처리
-                        Log.e("err", "HTTP error code: " + responseCode);
+                            routeList.set(i , "---------\n"+route.toStringDepart() + s[0]+
+                                    "\n\n"+route.toStringDest() + s[1]+"\n---------");
+                        }
                     }
-                }
-                catch (Exception e){
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            adapter.notifyDataSetChanged();
+                        }
+                    });
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }

@@ -180,12 +180,10 @@ public class Route {
 
     private String destRegioncode;
 
-    @Override
-    public String toString() {
+    public String toStringDepart() {
 
         LocalDateTime departDateTime = LocalDateTime.of(departYear, departMonth, departDay, departHour, departMinute);
         // 도착 시간 LocalDateTime 객체 생성
-        LocalDateTime destDateTime = LocalDateTime.of(destYear, destMonth, destDay, destHour, destMinute);
 
         // 출발지 정보 문자열 생성
         String departInfo = "출발지: " + departName + "\n" +
@@ -198,6 +196,16 @@ public class Route {
                 "출발지 지역코드: " + departRegioncode + "\n";
 
         // 도착지 정보 문자열 생성
+
+        // 출발지 정보와 도착지 정보를 결합하여 반환
+        return departInfo ;
+    }
+
+    public String toStringDest() {
+
+        LocalDateTime destDateTime = LocalDateTime.of(destYear, destMonth, destDay, destHour, destMinute);
+
+        // 출발지 정보 문자열 생성
         String destInfo = "도착지: " + destName + "\n" +
                 "(예상)도착 시간: " + destDateTime.format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분")) + "\n" +
                 "도착지 위도: " + destLat + "\n" +
@@ -208,6 +216,6 @@ public class Route {
                 "도착지 지역코드: " + destRegioncode + "\n";
 
         // 출발지 정보와 도착지 정보를 결합하여 반환
-        return departInfo + destInfo;
+        return  destInfo;
     }
 }
