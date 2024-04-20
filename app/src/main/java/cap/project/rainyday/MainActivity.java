@@ -6,6 +6,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
+
+import cap.project.rainyday.tool.LoginSharedPreferences;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -51,6 +54,15 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, MainPageActivity.class);
                 startActivity(intent);
                 finish();
+            }
+        });
+
+        Button logout = findViewById(R.id.logout);
+        logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LoginSharedPreferences.saveUserId(getApplicationContext(), 0);
+                Toast.makeText(MainActivity.this,"로그아웃됨",Toast.LENGTH_LONG).show();
             }
         });
 

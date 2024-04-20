@@ -4,4 +4,12 @@
         <item name="android:background">@color/black_overlay</item>
         <item name="android:buttonBarStyle">?android:attr/buttonBarStyle</item>
     </style>
+
+    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- ActionBar의 배경색 제거 -->
+        <item name="android:windowActionBar">false</item>
+        <!-- ActionBar의 그림자 제거 -->
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
 </resources>

@@ -5,10 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 
 
@@ -29,7 +26,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
-import cap.project.rainyday.data.model.Route;
+import cap.project.rainyday.model.Route;
 
 import cap.project.rainyday.weather.Location;
 import cap.project.rainyday.weather.MidTermWeather;
@@ -57,23 +54,9 @@ public class RouteActivity extends AppCompatActivity {
 
     }
 
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_add) {
-            // + 메뉴 터치시 이동
-            Intent intent = new Intent(RouteActivity.this, RouteDepartActivity.class);
-            intent.putExtra("scheduleId", scheduleId);
-            startActivity(intent);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
+
+
 
     protected void onResume() {
         super.onResume();
@@ -187,22 +170,26 @@ public class RouteActivity extends AppCompatActivity {
                                 LocalDateTime dateTime;
                                 Location location;
                                 if(k==0) {
-                                    dateTime = LocalDateTime.of(departYear, departMonth, departDay, departHour, departMinute);
+                                    dateTime = LocalDateTime.of(departYear, departMonth, departDay, departHour + 1, 0);
                                     location = new Location(departNx,departNy,departRegioncode);
                                 }
                                 else{
-                                    dateTime = LocalDateTime.of(destYear, destMonth, destDay, destHour, destMinute);
+                                    dateTime = LocalDateTime.of(destYear, destMonth, destDay, destHour + 1, 0);
                                     location = new Location(destNx,destNy,destRegioncode);
                                 }
                                 Duration duration = Duration.between(now, dateTime);
                                 long daysDifference = duration.toDays(); // Day 차이
                                 try {
                                     if (dateTime.isAfter(now)) {
-                                        if (daysDifference >= 0 && daysDifference <= 2) {
+                                        if (daysDifference >= 0 && daysDifference <= 3) {
                                             ShortTermForeacast weather_f = new ShortTermForeacast(location);
                                             ShortTermWeather weather_s[] = weather_f.getWeather();
                                             //저는 for문으로 모두 출력했지만 첫번째 인덱스의 시간과 날짜를 보고 몇시간 후인지 전인지 보고 인덱스를 더하고 몇일 뒤인지에 따라 24만큼 인덱스를 더해서 빠르게 접근가능합니다
                                             for (ShortTermWeather weather : weather_s) {
+                                                if(!weather.fcst.format(DateTimeFormatter.ofPattern("ddHHmm")).
+                                                        equals(dateTime.format(DateTimeFormatter.ofPattern("ddHHmm")))){
+                                                   continue;
+                                                }
                                                 s[k] += "날짜 : ";
                                                 s[k]  += weather.fcst.format(DateTimeFormatter.ofPattern("ddHHmm"));
                                                 s[k]  += "TMP 온도 : ";
@@ -213,17 +200,24 @@ public class RouteActivity extends AppCompatActivity {
                                                 s[k]  += weather.pcp;
                                                 s[k]  += "\n";
                                             }
-                                        } else if (daysDifference >= 3 && daysDifference <= 10) {
+                                        } else if (daysDifference >= 4 && daysDifference <= 10) {
                                             midTermForecast midTerm = new midTermForecast(LocalDateTime.now(), location);
                                             //중기 예보의 경우 0600 1800에만 발표
                                             // midTerm.getWeather_midTerm();
                                             MidTermWeather weather_m[] = midTerm.getWeather_midTerm_get_all();
                                             //0 인덱스부터 3일후 7인덱스가 10일 후 입니다
+
                                             for (int j = 0; j < 8; ++j) {
-                                                s[k]  += (j + 3) + "일 후 오전 강수확률 :" + weather_m[j].rnStAm+"\n";
-                                                s[k]  += (j + 3) + "일 후 오전 날씨 :" + weather_m[j].wfAm+"\n";
-                                                s[k]  += (j + 3) + "일 후 오후 강수확률 :" + weather_m[j].rnStPm+"\n";
-                                                s[k]  += (j + 3) + "일 후 오후 날씨 :" + weather_m[j].wfPm;
+                                                if(daysDifference == (j+3)) {
+                                                    if(dateTime.getHour() <=12) {
+                                                        s[k] += (j + 3) + "일 후 오전 강수확률 :" + weather_m[j].rnStAm + "\n";
+                                                        s[k] += (j + 3) + "일 후 오전 날씨 :" + weather_m[j].wfAm + "\n";
+                                                    }
+                                                    else {
+                                                        s[k] += (j + 3) + "일 후 오후 강수확률 :" + weather_m[j].rnStPm + "\n";
+                                                        s[k] += (j + 3) + "일 후 오후 날씨 :" + weather_m[j].wfPm;
+                                                    }
+                                                }
                                             }
                                         } else {
                                             s[k]  = "10일 이후 날씨는 제공되지 않습니다.";

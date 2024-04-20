@@ -12,6 +12,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
@@ -24,16 +26,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-public class LoginActivity extends AppCompatActivity {
-    private static class User {
-        private String id;
-        private String password;
+import cap.project.rainyday.model.User;
+import cap.project.rainyday.tool.LoginSharedPreferences;
 
-        public User(String id, String password) {
-            this.id = id;
-            this.password = password;
-        }
-    }
+public class LoginActivity extends AppCompatActivity {
 
     private void showLoginFailedDialog(String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -56,8 +52,14 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        long id = LoginSharedPreferences.getUserId(getApplicationContext());
+        Log.d("TAG", id+"");
+        if(id > 0) {
+            Intent intent = new Intent(LoginActivity.this, MainPageActivity.class);
+            startActivity(intent);
+            finish();
+        }
         setContentView(R.layout.activity_login);
-
         // 로그인 버튼
         Button button_login = findViewById(R.id.button_login);
         TextInputLayout textInputLayout_id = findViewById(R.id.user_id);
@@ -81,8 +83,7 @@ public class LoginActivity extends AppCompatActivity {
                     public void run() {
                         // JSON 형식으로 데이터 생성
                         User user = new User(id, password);
-                        Gson gson = new Gson();
-                        String json = gson.toJson(user);
+                        String json = user.toJson();
 
                         // HTTP 요청 보내기
                         try {
@@ -106,18 +107,27 @@ public class LoginActivity extends AppCompatActivity {
                             // 응답 받기
                             int responseCode = con.getResponseCode();
                             if (responseCode == HttpURLConnection.HTTP_OK) {
-                                InputStream inputStream = con.getInputStream();
-                                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+                                BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                                String inputLine;
+                                StringBuilder response = new StringBuilder();
 
+                                // 응답 데이터 읽기
+                                while ((inputLine = in.readLine()) != null) {
+                                    response.append(inputLine);
+                                }
+                                in.close();
                                 // 응답 Body에서 long 값 읽기
-                                String responseBody = reader.readLine();
-                                long responseLong = Long.parseLong(responseBody);
+                                ObjectMapper objectMapper = new ObjectMapper();
+                                JsonNode rootNode = objectMapper.readTree(response.toString());
+                                long userId = rootNode.get("userId").asLong();
+                                String userName = rootNode.get("userName").asText();
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
                                         showToast("로그인에 성공했습니다.");
                                         Intent intent = new Intent(LoginActivity.this, MainPageActivity.class);
-                                        intent.putExtra("userId", responseLong);
+                                        LoginSharedPreferences.saveUserId(getApplicationContext(), userId);
+                                        LoginSharedPreferences.saveUserName(getApplicationContext(), userName);
                                         startActivity(intent);
                                         finish();
                                     }

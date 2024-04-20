@@ -90,7 +90,7 @@ public class ShortTermForeacast {
             base = base.minusHours(3);
         }
         base = base.withMinute(0);
-        int num = 100;
+        int num = 9999;
         int pageNo = 1;
         String api;
         JSONObject responseJson;
@@ -101,7 +101,6 @@ public class ShortTermForeacast {
         JSONArray item;
         api = "http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?serviceKey=" + serviceKey + "&dataType=JSON&numOfRows=" + num + "&pageNo=" + pageNo + "&base_date=" + base.format(DateTimeFormatter.ofPattern("yyyyMMdd")) + "&base_time=" + base.format(DateTimeFormatter.ofPattern("HHmm")) + "&nx=" + location.nx + "&ny=" + location.ny;
         responseJson = getJson(api);
-        Log.d("api1", responseJson.toString());
         item = responseJson.getJSONObject("response").getJSONObject("body").getJSONObject("items").getJSONArray("item");
         tempJson = item.getJSONObject(0);
         tempWeather = new ShortTermWeather();
@@ -110,15 +109,6 @@ public class ShortTermForeacast {
                 (Integer.parseInt((String) tempJson.get("fcstDate")) % 10000) % 100,
                 Integer.parseInt((String) tempJson.get("fcstTime")) / 100, 0);
         tempWeather.base = base;
-        while (true) {
-            api = "http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?serviceKey=" + serviceKey + "&dataType=JSON&numOfRows=" + num + "&pageNo=" + pageNo + "&base_date=" + base.format(DateTimeFormatter.ofPattern("yyyyMMdd")) + "&base_time=" + base.format(DateTimeFormatter.ofPattern("HHmm")) + "&nx=" + location.nx + "&ny=" + location.ny;
-            responseJson = getJson(api);
-            try {
-                item = responseJson.getJSONObject("response").getJSONObject("body").getJSONObject("items").getJSONArray("item");
-                tempJson = item.getJSONObject(0);
-            } catch (Exception e) {
-                break;
-            }
             for (int i = 0; i < num; ++i) {
                 try {
                     tempJson = item.getJSONObject(i);
@@ -141,8 +131,6 @@ public class ShortTermForeacast {
                     tempWeather.pop = Integer.valueOf((String) (tempJson.get("fcstValue")));
                 if (tempJson.get("category").equals("PCP"))
                     tempWeather.pcp = (String) (tempJson.get("fcstValue"));
-            }
-            ++pageNo;
         }
         weatherVector.add(tempWeather);
         weather = new ShortTermWeather[weatherVector.size()];

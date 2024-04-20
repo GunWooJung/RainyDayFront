@@ -92,4 +92,17 @@
         app:layout_constraintTop_toBottomOf="@id/button_register"
         app:layout_constraintVertical_bias="0.233" />
 
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="56dp"
+        android:backgroundTint="@color/mtrl_btn_text_btn_bg_color_selector"
+        android:text="회원가입"
+        android:textColor="@color/mtrl_text_btn_text_color_selector"
+        android:textSize="30sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

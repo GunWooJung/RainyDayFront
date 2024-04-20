@@ -21,18 +21,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-public class RegisterActivity extends AppCompatActivity {
-    private static class User {
-        private String id;
-        private String password;
-        private String name;
+import cap.project.rainyday.model.User;
 
-        public User(String id, String password, String name) {
-            this.id = id;
-            this.password = password;
-            this.name = name;
-        }
-    }
+public class RegisterActivity extends AppCompatActivity {
 
     private void showLoginFailedDialog(String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -81,14 +72,9 @@ public class RegisterActivity extends AppCompatActivity {
                     public void run() {
                         try {
                             // JSON 형식으로 데이터 생성
-
-                            String json = String.format("{\"id\": \"%s\", \"password\": \"%s\", \"name\": \"%s\"}",
-                                    id,
-                                    password,
-                                    name);
-
-
-                            String url = "http://ec2-54-144-194-174.compute-1.amazonaws.com/user/create";
+                            User user = new User(id, password, name);
+                            String json = user.toJson();
+                            String url = "http://ec2-54-144-194-174.compute-1.amazonaws.com/user";
 
                             URL obj = new URL(url);
                             HttpURLConnection con = (HttpURLConnection) obj.openConnection();
