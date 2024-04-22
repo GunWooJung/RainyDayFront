@@ -1,6 +1,7 @@
 package cap.project.rainyday;
 
 import android.app.Application;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -88,6 +90,27 @@ public class ScheAdapter extends RecyclerView.Adapter<ScheAdapter.ViewHolder> {
             hashTag = itemView.findViewById(R.id.tag);
             itemView.setOnClickListener(this);
             sche_dots = itemView.findViewById(R.id.sche_dots);
+
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    int position = getAdapterPosition();
+                    Schedule item = Items.get(position);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+                    builder.setTitle("일정 삭제")
+                            .setMessage(item.getTitle()+" 일정을 정말로 삭제하시겠습니까?")
+                            .setPositiveButton("예", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // 사용자가 "예"를 선택한 경우
+                                    deleteItemClick();
+                                }
+                            })
+                            .setNegativeButton("아니오", null) // 사용자가 "아니오"를 선택한 경우 아무 작업도 수행하지 않음
+                            .show();
+                    return true;
+                }
+            });
         }
 
         public void bind(Schedule item ,int position) {
@@ -126,6 +149,7 @@ public class ScheAdapter extends RecyclerView.Adapter<ScheAdapter.ViewHolder> {
                     popupMenu.getMenu().add("일정 보기");
                     popupMenu.getMenu().add("일정 수정");
                     popupMenu.getMenu().add("일정 삭제");
+                    popupMenu.getMenu().add("공유 하기");
                     // 팝업 메뉴 아이템 클릭 리스너 설정
                     popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                         @Override
@@ -144,10 +168,26 @@ public class ScheAdapter extends RecyclerView.Adapter<ScheAdapter.ViewHolder> {
                                     // 기능2 선택 시 실행할 코드
                                     Toast.makeText(v.getContext(), item.getScheduleId() + "일정 수정", Toast.LENGTH_SHORT).show();
                                     return true;
+                                case "공유 하기":
+                                    // 기능2 선택 시 실행할 코드
+                                    Toast.makeText(v.getContext(), item.getScheduleId() + "공유하기", Toast.LENGTH_SHORT).show();
+                                    return true;
                                 case "일정 삭제":
                                     // 기능3 선택 시 실행할 코드
                                    // Toast.makeText(v.getContext(), item.getScheduleId() + "일정 삭제", Toast.LENGTH_SHORT).show();
-                                    deleteItemClick();
+
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+                                    builder.setTitle("일정 삭제")
+                                            .setMessage(item.getTitle()+" 일정을 정말로 삭제하시겠습니까?")
+                                            .setPositiveButton("예", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    // 사용자가 "예"를 선택한 경우
+                                                    deleteItemClick();
+                                                }
+                                            })
+                                            .setNegativeButton("아니오", null) // 사용자가 "아니오"를 선택한 경우 아무 작업도 수행하지 않음
+                                            .show();
                                     Log.d("ABE" , "a0");
                                     return true;
                                 default:
@@ -174,10 +214,9 @@ public class ScheAdapter extends RecyclerView.Adapter<ScheAdapter.ViewHolder> {
         public void deleteItemClick() {
             int position = getAdapterPosition();
             Schedule item = Items.get(position);
-            listener.deleteItemClick( item, position);
+            listener.deleteItemClick(item, position);
             Log.d("ABE" , "a1");
         }
-
 
     }
 }

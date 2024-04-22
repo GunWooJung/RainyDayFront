@@ -96,6 +96,7 @@ public class ScheduleAddActivity extends AppCompatActivity {
                                     public void run() {
                                         showToast("일정이 등록되었습니다.");
                                         finish();
+
                                     }
                                 });
                             } else if (responseCode == HttpURLConnection.HTTP_BAD_REQUEST) {
@@ -103,6 +104,7 @@ public class ScheduleAddActivity extends AppCompatActivity {
                                     @Override
                                     public void run() {
                                         showLoginFailedDialog("일정 등록에 실패하였습니다.");
+
                                     }
                                 });
                             } else {
@@ -111,6 +113,7 @@ public class ScheduleAddActivity extends AppCompatActivity {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
+
                     }
                 }).start();
             }

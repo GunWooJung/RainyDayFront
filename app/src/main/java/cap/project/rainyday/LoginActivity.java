@@ -128,6 +128,7 @@ public class LoginActivity extends AppCompatActivity {
                                         LoginSharedPreferences.saveUserName(getApplicationContext(), userName);
                                         startActivity(intent);
                                         finish();
+
                                     }
                                 });
                             } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
@@ -135,6 +136,7 @@ public class LoginActivity extends AppCompatActivity {
                                     @Override
                                     public void run() {
                                         showLoginFailedDialog("아이디 혹은 비밀번호가 일치하지 않습니다.");
+
                                     }
                                 });
                             } else if (responseCode == HttpURLConnection.HTTP_BAD_REQUEST) {
@@ -142,6 +144,7 @@ public class LoginActivity extends AppCompatActivity {
                                     @Override
                                     public void run() {
                                         showLoginFailedDialog("잘못된 요청입니다.");
+
                                     }
                                 });
                             } else {
@@ -150,6 +153,7 @@ public class LoginActivity extends AppCompatActivity {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
+
                     }
                 }).start();
             }
