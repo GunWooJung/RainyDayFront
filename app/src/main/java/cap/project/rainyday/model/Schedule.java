@@ -4,7 +4,9 @@ import androidx.annotation.NonNull;
 
 import com.google.gson.Gson;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -66,5 +68,40 @@ public class Schedule {
 
         public void setHashTag(String hashTag) {
                 this.hashTag = hashTag;
+        }
+
+        public static class ScheduleComparator implements Comparator<Schedule> {
+                @Override
+                public int compare(Schedule s1, Schedule s2) {
+                        LocalDateTime currentTime = LocalDateTime.now();
+                        LocalDateTime time1 = LocalDateTime.parse(s1.getDepartTime());
+                        LocalDateTime time2 = LocalDateTime.parse(s2.getDepartTime());
+
+                        // 현재 시간과의 차이 계산
+                        long diff1 = Duration.between(currentTime, time1).toMillis();
+                        long diff2 = Duration.between(currentTime, time2).toMillis();
+
+                        // 가까운 시간 순으로 정렬
+                        if(diff1 == diff2){
+                                return 0;
+                        }
+                        else if (diff1 > 0 && diff2 > 0) {
+                                if(diff1 < diff2) return -1;
+                                else return 1;
+                        }
+                        else if (diff1 < 0 && diff2 > 0) {
+                                return 1;
+                        }
+                        else if (diff1 > 0 && diff2 < 0) {
+                                return -1;
+                        }
+                        else if (diff1 < 0 && diff2 < 0) {
+                                if(diff1 < diff2) return 1;
+                                else return -1;
+                        }
+                        else {
+                                return 0;
+                        }
+                }
         }
 }

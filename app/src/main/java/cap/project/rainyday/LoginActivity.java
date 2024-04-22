@@ -16,11 +16,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.gson.Gson;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -53,20 +51,20 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         long id = LoginSharedPreferences.getUserId(getApplicationContext());
-        Log.d("TAG", id+"");
-        if(id > 0) {
+        Log.d("TAG", id + "");
+        if (id > 0) {
             Intent intent = new Intent(LoginActivity.this, MainPageActivity.class);
             startActivity(intent);
             finish();
         }
-        setContentView(R.layout.activity_login);
-        // 로그인 버튼
-        Button button_login = findViewById(R.id.button_login);
-        TextInputLayout textInputLayout_id = findViewById(R.id.user_id);
-        TextInputLayout textInputLayout_password =  findViewById(R.id.user_password);
-        // 로그인 입력 박스
-        TextInputEditText user_id = (TextInputEditText) textInputLayout_id.getEditText();
-        TextInputEditText user_password = (TextInputEditText) textInputLayout_password.getEditText();
+            setContentView(R.layout.activity_login);
+            // 로그인 버튼
+            Button button_login = findViewById(R.id.button_login);
+            TextInputLayout textInputLayout_id = findViewById(R.id.user_id_layout);
+            TextInputLayout textInputLayout_password = findViewById(R.id.user_password_layout);
+            // 로그인 입력 박스
+            TextInputEditText user_id = (TextInputEditText) textInputLayout_id.getEditText();
+            TextInputEditText user_password = (TextInputEditText) textInputLayout_password.getEditText();
 
         button_login.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -132,24 +130,21 @@ public class LoginActivity extends AppCompatActivity {
                                         finish();
                                     }
                                 });
-                            }
-                            else if(responseCode == HttpURLConnection.HTTP_UNAUTHORIZED){
+                            } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
                                         showLoginFailedDialog("아이디 혹은 비밀번호가 일치하지 않습니다.");
                                     }
                                 });
-                            }
-                            else if(responseCode == HttpURLConnection.HTTP_BAD_REQUEST){
+                            } else if (responseCode == HttpURLConnection.HTTP_BAD_REQUEST) {
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
                                         showLoginFailedDialog("잘못된 요청입니다.");
                                     }
                                 });
-                            }
-                            else {
+                            } else {
                                 Log.d("login", "로그인 실패");
                             }
                         } catch (Exception e) {

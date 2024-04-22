@@ -7,6 +7,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -36,12 +37,8 @@ import cap.project.rainyday.weather.midTermForecast;
 
 public class RouteActivity extends AppCompatActivity {
 
-    private ArrayList<String> routeList;
-    private ArrayAdapter<String> adapter;
-    private ListView listViewRoute;
-
-    private ArrayList<Route> routeListFromBackend;
     private long scheduleId;
+    TextView text;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,15 +46,18 @@ public class RouteActivity extends AppCompatActivity {
         setContentView(R.layout.activity_route);
         Intent intent = getIntent();
         scheduleId = intent.getLongExtra("scheduleId", 0);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        text = findViewById(R.id.tt);
+        text.setText(String.valueOf(scheduleId));
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        text.setText(String.valueOf(scheduleId));
+    }
 
-
-
-
+    /*
     protected void onResume() {
         super.onResume();
         routeList = new ArrayList<>();
@@ -246,5 +246,5 @@ public class RouteActivity extends AppCompatActivity {
                 }
             }
         }).start();
-    }
+    }*/
 }

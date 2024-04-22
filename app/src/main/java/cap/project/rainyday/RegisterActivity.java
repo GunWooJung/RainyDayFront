@@ -14,7 +14,6 @@ import android.widget.Toast;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.gson.Gson;
 
 import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
@@ -49,9 +48,9 @@ public class RegisterActivity extends AppCompatActivity {
 
         // 회원가입 버튼
         Button button_register = findViewById(R.id.button_register);
-        TextInputLayout textInputLayout_id = findViewById(R.id.edit_id);
-        TextInputLayout textInputLayout_password =  findViewById(R.id.edit_password);
-        TextInputLayout textInputLayout_user_name =  findViewById(R.id.edit_name);
+        TextInputLayout textInputLayout_id = findViewById(R.id.edit_id_layout);
+        TextInputLayout textInputLayout_password =  findViewById(R.id.edit_password_layout);
+        TextInputLayout textInputLayout_user_name =  findViewById(R.id.edit_name_layout);
         // 로그인 입력 박스
         TextInputEditText  user_id = (TextInputEditText) textInputLayout_id.getEditText();
         TextInputEditText user_password = (TextInputEditText) textInputLayout_password.getEditText();
@@ -131,7 +130,7 @@ public class RegisterActivity extends AppCompatActivity {
         });
 
         // 이미 회원이시라구요? --> 로그인 화면으로
-        Button button_login = findViewById(R.id.button_login);
+        Button button_login = findViewById(R.id.button_already_member);
         button_login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
