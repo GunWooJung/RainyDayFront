@@ -5,7 +5,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -49,6 +52,7 @@ public class RouteActivity extends AppCompatActivity {
     private ListView listViewRoute;
 
     private ArrayList<Location> FromBackend;
+    ImageButton back;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +60,13 @@ public class RouteActivity extends AppCompatActivity {
         setContentView(R.layout.activity_schedule_weather);
         Intent intent = getIntent();
         scheduleId = intent.getLongExtra("scheduleId", 0);
-
+        back = findViewById(R.id.backhome);
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
     }
 
     @Override
@@ -92,20 +102,18 @@ public class RouteActivity extends AppCompatActivity {
                             response.append(inputLine);
                         }
                         in.close();
-                        Log.d("resp",response.toString());
+                        Log.d("resp", response.toString());
                         // JSON 데이터 파싱 및 리스트뷰에 추가
                         JsonArray jsonArray = JsonParser.parseString(response.toString()).getAsJsonArray();
                         for (int i = 0; i < jsonArray.size(); i++) {
                             JsonObject scheduleObject = jsonArray.get(i).getAsJsonObject();
                             Location location = new Location();
                             location.setName(scheduleObject.get("name").getAsString());
-                            if(i==0){
+                            if (i == 0) {
                                 location.setDepartTime(scheduleObject.get("departTime").getAsString());
-                            }
-                            else if(i== jsonArray.size()-1){
+                            } else if (i == jsonArray.size() - 1) {
                                 location.setDestTime(scheduleObject.get("destTime").getAsString());
-                            }
-                            else{
+                            } else {
                                 location.setDepartTime(scheduleObject.get("departTime").getAsString());
                                 location.setDestTime(scheduleObject.get("destTime").getAsString());
                             }
@@ -147,15 +155,14 @@ public class RouteActivity extends AppCompatActivity {
                                     i--;
                                     result += "경유지 도착\n";
                                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-                                    dateTime = LocalDateTime.parse(location.getDepartTime(), formatter);
+                                    dateTime = LocalDateTime.parse(location.getDestTime(), formatter);
                                     duration = Duration.between(now, dateTime);
                                     daysDifference = duration.toDays(); // Day 차이
-                                }
-                                else if (first == false) {
+                                } else if (first == false) {
                                     first = true;
                                     result += "경유지 출발\n";
                                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-                                    dateTime = LocalDateTime.parse(location.getDestTime(), formatter);
+                                    dateTime = LocalDateTime.parse(location.getDepartTime(), formatter);
                                     duration = Duration.between(now, dateTime);
                                     daysDifference = duration.toDays(); // Day 차이
                                 }
@@ -169,15 +176,22 @@ public class RouteActivity extends AppCompatActivity {
                                         for (ShortTermWeather weather : weather_s) {
                                             if (!weather.fcst.format(DateTimeFormatter.ofPattern("ddHH")).
                                                     equals(dateTime.format(DateTimeFormatter.ofPattern("ddHH")))) {
-                                               // Log.d("lista", dateTime.format(DateTimeFormatter.ofPattern("ddHHmm")));
+                                                // Log.d("lista", dateTime.format(DateTimeFormatter.ofPattern("ddHHmm")));
                                                 continue;
                                             }
-                                        //    Log.d("lista", dateTime.format(DateTimeFormatter.ofPattern("ddHHmm")));
-                                            result += "장소 : "+location.getName();
-                                            result += "\n날짜 : " + weather.fcst.format(DateTimeFormatter.ofPattern("ddHH"));
-                                            result += "\n온도 : " + weather.tmp;
-                                            result += "\n강수확률 : " + weather.pop;
-                                            result += "\n강수량 : " + weather.pcp + "mm";
+                                            //    Log.d("lista", dateTime.format(DateTimeFormatter.ofPattern("ddHHmm")));
+                                            result += "장소 : " + location.getName();
+                                            result += "\n날짜 : " + dateTime.format(DateTimeFormatter.ofPattern("ddHHmm")).substring(0, 2) +
+                                                    "일 " + dateTime.format(DateTimeFormatter.ofPattern("ddHHmm")).substring(2, 4) +
+                                                    "시 " + dateTime.format(DateTimeFormatter.ofPattern("ddHHmm")).substring(4, 6) +
+                                                    "분";
+                                            result += "\n온도 : " + weather.tmp+"ºC";
+                                            result += "\n강수확률 : " + weather.pop + "%";
+                                            if (weather.pcp.equals("강수없음")) {
+                                                result += "\n강수량 : " + weather.pcp;
+                                            } else {
+                                                result += "\n강수량 : " + weather.pcp;
+                                            }
                                         }
                                     } else if (daysDifference >= 4 && daysDifference <= 10) {
                                         midTermForecast midTerm = new midTermForecast(LocalDateTime.now(), weatherLocation);
@@ -188,9 +202,13 @@ public class RouteActivity extends AppCompatActivity {
 
                                         for (int j = 0; j < 8; ++j) {
                                             if (daysDifference == (j + 3)) {
-                                                result += "장소 : "+location.getName();
-                                                result += "\n날짜 : " + dateTime.format(DateTimeFormatter.ofPattern("ddHH"));
-                                                result += "\n강수확률 : " + weather_m[j].rnStAm;
+                                                result += "장소 : " + location.getName();
+                                                result += "\n날짜 : " + dateTime.format(DateTimeFormatter.ofPattern("ddHHmm")).substring(0, 2) +
+                                                        "일 " + dateTime.format(DateTimeFormatter.ofPattern("ddHHmm")).substring(2, 4) +
+                                                        "시 " + dateTime.format(DateTimeFormatter.ofPattern("ddHHmm")).substring(4, 6) +
+                                                        "분";
+                                                result += "\n강수확률 : " + weather_m[j].rnStAm + "%";
+                                                ;
                                                 result += "\n날씨 : " + weather_m[j].wfAm + "\n";
                                             }
                                         }
@@ -204,7 +222,7 @@ public class RouteActivity extends AppCompatActivity {
                                 Log.d("abc", e.toString());
                                 result = "해당 장소를 조회할 수 없습니다.";
                             }
-                                routeList.add(result);
+                            routeList.add(result);
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -216,7 +234,7 @@ public class RouteActivity extends AppCompatActivity {
 
 
                 } catch (Exception e) {
-                   Log.d("eeee", e.toString());
+                    Log.d("eeee", e.toString());
                 }
             }
         }).start();
