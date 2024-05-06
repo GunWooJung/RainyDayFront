@@ -7,7 +7,7 @@
     android:background="@color/white"
     android:backgroundTintMode="add"
     android:orientation="vertical"
-    tools:context=".RouteDepartActivity">
+    tools:context=".RouteActivity">
 
 
     <fragment

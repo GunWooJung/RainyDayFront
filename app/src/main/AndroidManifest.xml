@@ -28,13 +28,10 @@
             android:name=".RegisterActivity"
             android:exported="false" />
         <activity
-            android:name=".RouteDepartActivity"
+            android:name=".RouteActivity"
             android:exported="false" />
         <activity
             android:name=".ScheduleAddActivity"
-            android:exported="false" />
-        <activity
-            android:name=".RouteActivity"
             android:exported="false" />
         <activity
             android:name=".RouteDestActivity"

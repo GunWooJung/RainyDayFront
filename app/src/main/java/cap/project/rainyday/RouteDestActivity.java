@@ -182,11 +182,12 @@ public class RouteDestActivity extends AppCompatActivity {
                                     @Override
                                     public void run() {
                                         showToast("경로가 등록되었습니다.");
+                                        /*
                                         Intent intent = new Intent(RouteDestActivity.this, RouteActivity.class);
                                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                         intent.putExtra("scheduleId", scheduleId);
                                         startActivity(intent);
-                                        finish();
+                                        finish();*/
                                     }
                                 });
                             } else if (responseCode == HttpURLConnection.HTTP_BAD_REQUEST) {
