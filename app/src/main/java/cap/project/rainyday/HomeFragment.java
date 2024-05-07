@@ -157,41 +157,6 @@ public class HomeFragment extends Fragment implements ItemClickListener {
     public void updateList(Boolean fetchBackend) {
         int sort = SortSharedPreferences.getSort(getActivity().getApplicationContext());
 
-        if(fetchBackend == false){
-            if(sort == 0){ // "최근 등록 순"
-                Collections.reverse(scheItems);
-            }
-            else if(sort == 1){ // "가까운 일정 순"
-                Collections.sort(scheItems, new Schedule.ScheduleComparator());
-            }
-            if(scheItems.size() != 0) {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        addbutton.setVisibility(View.GONE);
-                        addtextView.setVisibility(View.GONE);
-                        adapter.setItems(scheItems);
-                        adapter.notifyDataSetChanged();
-
-                    }
-                });
-            }
-            else {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        scheItems.clear();
-                        adapter.setItems(scheItems);
-                        adapter.notifyDataSetChanged();
-                        addbutton.setVisibility(View.VISIBLE);
-                        addtextView.setVisibility(View.VISIBLE);
-
-                    }
-                });
-            }
-            return;
-        }
-
         if (scheItems == null) {
             scheItems = new ArrayList<>();
         } else {
