@@ -40,9 +40,6 @@
             android:name=".ScheduleAddActivity"
             android:exported="false" />
         <activity
-            android:name=".RouteDestActivity"
-            android:exported="false" />
-        <activity
             android:name=".MainActivity"
             android:exported="false" />
 

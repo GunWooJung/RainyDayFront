@@ -139,7 +139,7 @@ public class midTermForecast {
             return WeatherCode.cloudyRain;
         if (weather.equals("흐리고 눈"))
             return WeatherCode.cloudySnow;
-        if (weather.equals("흐리음 비/눈"))
+        if (weather.equals("흐리고 비/눈"))
             return WeatherCode.cloudyRS;
         if (weather.equals("흐리고 소나기"))
             return WeatherCode.cloudyShower;

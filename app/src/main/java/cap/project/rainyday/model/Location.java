@@ -6,9 +6,25 @@ public class Location {
     private String name;
     private double lat;
     private double lng;
+    private String time;
     private String departTime;
-
     private String destTime;
+
+    public String getDepartTime() {
+        return departTime;
+    }
+
+    public void setDepartTime(String departTime) {
+        this.departTime = departTime;
+    }
+
+    public String getDestTime() {
+        return destTime;
+    }
+
+    public void setDestTime(String destTime) {
+        this.destTime = destTime;
+    }
 
     public int nx;
     public int ny;
@@ -36,14 +52,6 @@ public class Location {
 
     public String getRegioncode() {
         return regioncode;
-    }
-
-    public String getDestTime() {
-        return destTime;
-    }
-
-    public void setDestTime(String destTime) {
-        this.destTime = destTime;
     }
 
     private int durationMin = 0;
@@ -74,13 +82,6 @@ public class Location {
         this.lng = lng;
     }
 
-    public String getDepartTime() {
-        return departTime;
-    }
-
-    public void setDepartTime(String departTime) {
-        this.departTime = departTime;
-    }
 
     public int getDurationMin() {
         return durationMin;
@@ -90,17 +91,11 @@ public class Location {
         this.durationMin = durationMin;
     }
 
-    public String toString() {
-        return "Location{" +
-                "name='" + name + '\'' +
-                ", lat=" + lat +
-                ", lng=" + lng +
-                ", departTime='" + departTime + '\'' +
-                ", destTime='" + destTime + '\'' +
-                ", durationMin=" + durationMin +
-                ", nx=" + nx +
-                ", ny=" + ny +
-                ", regioncode='" + regioncode + '\'' +
-                '}';
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
     }
 }
