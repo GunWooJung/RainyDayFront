@@ -162,15 +162,7 @@ public class RouteActivity extends AppCompatActivity implements WeatherClickList
                                 location.setRegioncode(scheduleObject.get("regioncode").getAsString());
                                 FromBackend.add(location);
                             } else {
-                                Location locationDepart = new Location();
-                                locationDepart.setName(scheduleObject.get("name").getAsString());
-                                locationDepart.setTime(scheduleObject.get("departTime").getAsString());
-                                locationDepart.setLat(scheduleObject.get("lat").getAsDouble());
-                                locationDepart.setLng(scheduleObject.get("lng").getAsDouble());
-                                locationDepart.setNx(scheduleObject.get("nx").getAsInt());
-                                locationDepart.setNy(scheduleObject.get("ny").getAsInt());
-                                locationDepart.setRegioncode(scheduleObject.get("regioncode").getAsString());
-                                FromBackend.add(locationDepart);
+
 
                                 Location locationDest = new Location();
                                 locationDest.setName(scheduleObject.get("name").getAsString());
@@ -181,6 +173,17 @@ public class RouteActivity extends AppCompatActivity implements WeatherClickList
                                 locationDest.setNy(scheduleObject.get("ny").getAsInt());
                                 locationDest.setRegioncode(scheduleObject.get("regioncode").getAsString());
                                 FromBackend.add(locationDest);
+                                
+                                Location locationDepart = new Location();
+                                locationDepart.setName(scheduleObject.get("name").getAsString());
+                                locationDepart.setTime(scheduleObject.get("departTime").getAsString());
+                                locationDepart.setLat(scheduleObject.get("lat").getAsDouble());
+                                locationDepart.setLng(scheduleObject.get("lng").getAsDouble());
+                                locationDepart.setNx(scheduleObject.get("nx").getAsInt());
+                                locationDepart.setNy(scheduleObject.get("ny").getAsInt());
+                                locationDepart.setRegioncode(scheduleObject.get("regioncode").getAsString());
+                                FromBackend.add(locationDepart);
+
                             }
 
 
