@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_info"
+        android:title="내 정보"
+        android:icon="@drawable/ic_myinfo" />
+    <item
+        android:id="@+id/navigation_logout"
+        android:title="로그아웃"
+        android:icon="@drawable/ic_logout" />
+
+</menu>

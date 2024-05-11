@@ -143,13 +143,15 @@ public class RouteActivity extends AppCompatActivity {
                                 dateTime = LocalDateTime.parse(location.getDepartTime(), formatter);
                                 duration = Duration.between(now, dateTime);
                                 daysDifference = duration.toDays(); // Day 차이
-                            } else if (i == FromBackend.size() - 1) {
+                            }
+                            else if (i == FromBackend.size() - 1) {
                                 result += "목적지\n";
                                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
                                 dateTime = LocalDateTime.parse(location.getDestTime(), formatter);
                                 duration = Duration.between(now, dateTime);
                                 daysDifference = duration.toDays(); // Day 차이
-                            } else {
+                            }
+                            else {
                                 if (first == true) {
                                     first = false;
                                     i--;
@@ -176,7 +178,7 @@ public class RouteActivity extends AppCompatActivity {
                                         for (ShortTermWeather weather : weather_s) {
                                             if (!weather.fcst.format(DateTimeFormatter.ofPattern("ddHH")).
                                                     equals(dateTime.format(DateTimeFormatter.ofPattern("ddHH")))) {
-                                                // Log.d("lista", dateTime.format(DateTimeFormatter.ofPattern("ddHHmm")));
+                                                //Log.d("lista", dateTime.format(DateTimeFormatter.ofPattern("ddHHmm")));
                                                 continue;
                                             }
                                             //    Log.d("lista", dateTime.format(DateTimeFormatter.ofPattern("ddHHmm")));
@@ -192,9 +194,11 @@ public class RouteActivity extends AppCompatActivity {
                                             } else {
                                                 result += "\n강수량 : " + weather.pcp;
                                             }
+                                            break;
                                         }
-                                    } else if (daysDifference >= 4 && daysDifference <= 10) {
-                                        midTermForecast midTerm = new midTermForecast(LocalDateTime.now(), weatherLocation);
+                                    }
+                                    else if (daysDifference >= 4 && daysDifference <= 10) {
+                                        midTermForecast midTerm = new midTermForecast(weatherLocation);
                                         //중기 예보의 경우 0600 1800에만 발표
                                         // midTerm.getWeather_midTerm();
                                         MidTermWeather weather_m[] = midTerm.getWeather_midTerm_get_all();
@@ -210,9 +214,11 @@ public class RouteActivity extends AppCompatActivity {
                                                 result += "\n강수확률 : " + weather_m[j].rnStAm + "%";
                                                 ;
                                                 result += "\n날씨 : " + weather_m[j].wfAm + "\n";
+                                                break;
                                             }
                                         }
-                                    } else {
+                                    }
+                                    else {
                                         result = "10일 이후 날씨는 제공되지 않습니다.";
                                     }
                                 } else {

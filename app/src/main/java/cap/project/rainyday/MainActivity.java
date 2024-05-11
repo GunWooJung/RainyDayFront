@@ -63,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 LoginSharedPreferences.saveUserId(getApplicationContext(), 0);
                 Toast.makeText(MainActivity.this,"로그아웃됨",Toast.LENGTH_LONG).show();
+
             }
         });
 
