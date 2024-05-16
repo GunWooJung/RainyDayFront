@@ -11,12 +11,36 @@
         android:layout_height="match_parent"
         android:background="@drawable/location_weather_border">
 
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/type"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="출발"
+                android:textColor="@android:color/black"
+                android:textSize="16sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="#202020" />
+
+        </LinearLayout>
+
         <TextView
             android:id="@+id/location_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="52dp"
             android:text="장소"
             android:textColor="@android:color/black"
             android:textSize="16sp"
@@ -28,7 +52,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginBottom="32dp"
+            android:layout_marginBottom="16dp"
             android:text="시간"
             android:textColor="@android:color/black"
             android:textSize="16sp"
@@ -105,5 +129,6 @@
                 android:textColor="@android:color/black"
                 android:textSize="14sp" />
         </LinearLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </LinearLayout>

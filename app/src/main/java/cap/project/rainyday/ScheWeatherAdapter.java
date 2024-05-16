@@ -59,6 +59,9 @@ public class ScheWeatherAdapter extends RecyclerView.Adapter<ScheWeatherAdapter.
 
         private ImageView weather_icon;
 
+        private TextView type;
+
+
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -69,10 +72,20 @@ public class ScheWeatherAdapter extends RecyclerView.Adapter<ScheWeatherAdapter.
             rain_percent = itemView.findViewById(R.id.rain_percent);
             weather_info = itemView.findViewById(R.id.weather_info);
             weather_icon = itemView.findViewById(R.id.weather_icon);
-
+            type = itemView.findViewById(R.id.type);
         }
 
         public void bind(Weather item ,int position) {
+            if(position == 0){
+                type.setText("출발지");
+            }
+            else if(position == Items.size()-1){
+                type.setText("도착지");
+
+            }
+            else{
+                type.setText("경유지");
+            }
             if(item.getType() == 0) {   //단기
                 location_name.setText(item.getLocation());
                 location_time.setText(item.getTime());

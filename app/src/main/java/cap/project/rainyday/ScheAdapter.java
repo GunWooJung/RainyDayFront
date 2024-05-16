@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -166,18 +167,47 @@ public class ScheAdapter extends RecyclerView.Adapter<ScheAdapter.ViewHolder> {
                                     return true;
                                 case "일정 수정":
                                     // 기능2 선택 시 실행할 코드
-                                    Toast.makeText(v.getContext(), item.getScheduleId() + "일정 수정", Toast.LENGTH_SHORT).show();
+
+
                                     return true;
+
                                 case "공유 하기":
                                     // 기능2 선택 시 실행할 코드
-                                    Toast.makeText(v.getContext(), item.getScheduleId() + "공유하기", Toast.LENGTH_SHORT).show();
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+                                    builder.setTitle("일정 공유하기");
+                                    builder.setMessage("공유할 사람의 이름을 입력하세요.");
+
+                                    final EditText input = new EditText(v.getContext());
+                                    builder.setView(input);
+
+                                    builder.setPositiveButton("공유", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            String userInput = input.getText().toString();
+                                            if (userInput.isEmpty()) {
+                                                Toast.makeText(v.getContext(), "입력되지 않아 취소되었습니다.", Toast.LENGTH_SHORT).show();
+                                            }
+                                            else{
+                                                Toast.makeText(v.getContext(), "일정이 공유되었습니다.", Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
+                                    });
+
+                                    builder.setNegativeButton("취소", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            dialog.cancel();
+                                        }
+                                    });
+
+                                    builder.show();
                                     return true;
                                 case "일정 삭제":
                                     // 기능3 선택 시 실행할 코드
                                    // Toast.makeText(v.getContext(), item.getScheduleId() + "일정 삭제", Toast.LENGTH_SHORT).show();
 
-                                    AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
-                                    builder.setTitle("일정 삭제")
+                                    AlertDialog.Builder builder2 = new AlertDialog.Builder(v.getContext());
+                                    builder2.setTitle("일정 삭제")
                                             .setMessage(item.getTitle()+" 일정을 정말로 삭제하시겠습니까?")
                                             .setPositiveButton("예", new DialogInterface.OnClickListener() {
                                                 @Override
@@ -188,7 +218,7 @@ public class ScheAdapter extends RecyclerView.Adapter<ScheAdapter.ViewHolder> {
                                             })
                                             .setNegativeButton("아니오", null) // 사용자가 "아니오"를 선택한 경우 아무 작업도 수행하지 않음
                                             .show();
-                                    Log.d("ABE" , "a0");
+                                    //Log.d("ABE" , "a0");
                                     return true;
                                 default:
                                     return false;

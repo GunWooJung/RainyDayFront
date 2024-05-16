@@ -3,6 +3,7 @@ package cap.project.rainyday;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.media.Image;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -33,8 +34,15 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -479,12 +487,17 @@ public class ScheduleAddActivity extends AppCompatActivity {
                             // 응답 받기
                             int responseCode = con.getResponseCode();
                             if (responseCode == HttpURLConnection.HTTP_CREATED) {
+
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
                                         showToast("일정이 등록되었습니다.");
-                                        finish();
 
+                                        Intent intent = new Intent(ScheduleAddActivity.this, MainPageActivity.class);
+                                        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                        intent.putExtra("showAdd", 1);
+                                        startActivity(intent);
+                                        finish();
                                     }
                                 });
                             } else if (responseCode == HttpURLConnection.HTTP_BAD_REQUEST) {
@@ -497,11 +510,14 @@ public class ScheduleAddActivity extends AppCompatActivity {
                             } else {
                                 Log.d("http code : ", String.valueOf(responseCode));
                             }
-                        } catch (Exception e) {
+                        } catch (
+                                Exception e) {
                             e.printStackTrace();
                         }
                     }
-                }).start();
+                }).
+
+                        start();
 
             }
         });

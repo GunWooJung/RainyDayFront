@@ -24,6 +24,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -61,6 +62,8 @@ public class HomeFragment extends Fragment implements ItemClickListener {
     Button addbutton;
     TextView addtextView;
 
+    ProgressBar progressBar;
+
     public static ScheAdapter getAdapter() {
         return adapter;
     }
@@ -93,6 +96,8 @@ public class HomeFragment extends Fragment implements ItemClickListener {
         addtextView = view.findViewById(R.id.noListText);
         addbutton.setVisibility(View.GONE);
         addtextView.setVisibility(View.GONE);
+        progressBar = view.findViewById(R.id.progressBarMain);
+        progressBar.setVisibility(View.VISIBLE);
         addbutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -107,7 +112,9 @@ public class HomeFragment extends Fragment implements ItemClickListener {
     @Override
     public void onResume() {
         super.onResume();
+
         updateList(true);
+
     }
 
     @Override
@@ -209,6 +216,7 @@ public class HomeFragment extends Fragment implements ItemClickListener {
                             public void run() {
                                 addbutton.setVisibility(View.GONE);
                                 addtextView.setVisibility(View.GONE);
+                                progressBar.setVisibility(View.GONE);
                                 adapter.setItems(scheItems);
                                 adapter.notifyDataSetChanged();
 
@@ -223,6 +231,7 @@ public class HomeFragment extends Fragment implements ItemClickListener {
                                 scheItems.clear();
                                 adapter.setItems(scheItems);
                                 adapter.notifyDataSetChanged();
+                                progressBar.setVisibility(View.GONE);
                                 addbutton.setVisibility(View.VISIBLE);
                                 addtextView.setVisibility(View.VISIBLE);
 

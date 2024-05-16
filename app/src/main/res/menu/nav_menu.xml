@@ -5,6 +5,10 @@
         android:title="내 정보"
         android:icon="@drawable/ic_myinfo" />
     <item
+        android:id="@+id/navigation_password"
+        android:title="비밀번호 변경"
+        android:icon="@drawable/ic_password" />
+    <item
         android:id="@+id/navigation_logout"
         android:title="로그아웃"
         android:icon="@drawable/ic_logout" />

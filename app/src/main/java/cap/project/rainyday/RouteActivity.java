@@ -1,5 +1,6 @@
 package cap.project.rainyday;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -10,11 +11,14 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -57,6 +61,7 @@ public class RouteActivity extends AppCompatActivity implements WeatherClickList
     private long scheduleId;
     ImageButton back;
     Button backbutton;
+    ImageView trash;
 
     private RecyclerView recyclerView;
     private static ScheWeatherAdapter adapter;
@@ -64,6 +69,7 @@ public class RouteActivity extends AppCompatActivity implements WeatherClickList
     private List<Weather> weatherItems;
 
     private List<Location> FromBackend;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +83,10 @@ public class RouteActivity extends AppCompatActivity implements WeatherClickList
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new ScheWeatherAdapter(new ArrayList<>(), this);
         recyclerView.setAdapter(adapter);
-        loadingProgressBar = findViewById(R.id.loadingProgressBar);
+        trash = findViewById(R.id.trash);
+
+        loadingProgressBar = findViewById(R.id.progressBar);
+        loadingProgressBar.setVisibility(View.VISIBLE);
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -92,6 +101,56 @@ public class RouteActivity extends AppCompatActivity implements WeatherClickList
             }
         });
 
+        trash.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder2 = new AlertDialog.Builder(v.getContext());
+                builder2.setTitle("일정 삭제")
+                        .setMessage("일정을 정말로 삭제하시겠습니까?")
+                        .setPositiveButton("예", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                // 사용자가 "예"를 선택한 경우
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            String url = "http://ec2-54-144-194-174.compute-1.amazonaws.com/schedule/" + scheduleId;
+
+                                            URL obj = new URL(url);
+                                            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+                                            // HTTP 요청 설정
+                                            con.setRequestMethod("DELETE");
+                                            con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                                            int responseCode = con.getResponseCode();
+                                            if (responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
+                                                // 정상적인 응답일 때만 데이터를 읽어옴
+                                                runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        Toast.makeText(getApplicationContext(), "일정이 삭제되었습니다.", Toast.LENGTH_SHORT).show();
+                                                    }
+                                                });
+                                                 } else {
+                                                // 응답이 200이 아닌 경우 에러 처리
+                                                Log.e("err", "HTTP error code: " + responseCode);
+                                            }
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+
+                                    }
+                                }).start();
+
+                                finish();
+                            }
+                        })
+                        .setNegativeButton("아니오", null) // 사용자가 "아니오"를 선택한 경우 아무 작업도 수행하지 않음
+                        .show();
+
+            }
+        });
 
     }
 
@@ -267,6 +326,7 @@ public class RouteActivity extends AppCompatActivity implements WeatherClickList
                             @Override
                             public void run() {
                                 Collections.sort(weatherItems, Comparator.comparingInt(Weather::getIndex));
+                                loadingProgressBar.setVisibility(View.GONE);
                                 adapter.setItems(weatherItems);
                                 adapter.notifyDataSetChanged();
                             }
