@@ -1,5 +1,7 @@
 package cap.project.rainyday.weather;
 
+import android.util.Log;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.io.BufferedReader;
@@ -29,10 +31,9 @@ public class GetJson {
             Gson gson = new Gson();
             responseJson = gson.fromJson(jsonStr, JsonObject.class);
         } catch (Exception e) {
-            System.out.println("error");
-            System.out.println(responseJson);
-            System.err.println(api);
+            Log.d("API", e.toString());
         }
+
         return responseJson;
     }
 }

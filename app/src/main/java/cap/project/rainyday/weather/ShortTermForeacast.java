@@ -1,5 +1,7 @@
 package cap.project.rainyday.weather;
 
+import android.util.Log;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.time.LocalDateTime;
@@ -23,12 +25,19 @@ public class ShortTermForeacast {
     }
 
     public ShortTermWeather[] getWeather() {
+
         LocalDateTime base = getTime();
         Vector<ShortTermWeather> weatherVector = new Vector<ShortTermWeather>();
         String api = "http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?serviceKey=" + serviceKey + "&dataType=JSON&numOfRows=9999&pageNo=1&base_date=" + base.format(DateTimeFormatter.ofPattern("yyyyMMdd")) + "&base_time=" + base.format(DateTimeFormatter.ofPattern("HHmm")) + "&nx=" + location.nx + "&ny=" + location.ny;
+        Log.d("API", api);
         JsonObject responseJson = GetJson.getJson(api);
-        JsonArray item = responseJson.getAsJsonObject("response").getAsJsonObject("body").getAsJsonObject("items").getAsJsonArray("item");
-        JsonObject tempJson = item.get(0).getAsJsonObject();
+
+        JsonArray item;
+        JsonObject tempJson;
+
+        item = responseJson.getAsJsonObject("response").getAsJsonObject("body").getAsJsonObject("items").getAsJsonArray("item");
+        tempJson = item.get(0).getAsJsonObject();
+
         ShortTermWeather tempWeather = getNewShortTermForecast(tempJson, base);
         int sky = 0;
         int pty = 0;
@@ -61,7 +70,9 @@ public class ShortTermForeacast {
         for (int i = 0; i < weatherVector.size(); ++i) {
             weather[i] = weatherVector.get(i);
         }
+
         return weather;
+
     }
 
     private LocalDateTime getTime() {

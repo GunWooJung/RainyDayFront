@@ -81,5 +81,5 @@ dependencies {
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
     implementation "androidx.navigation:navigation-fragment:2.4.0"
     implementation "androidx.navigation:navigation-ui:2.4.0"
-
+    implementation "com.naver.maps:map-sdk:3.18.0"
 }

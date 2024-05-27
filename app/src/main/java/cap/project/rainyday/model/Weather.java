@@ -10,6 +10,16 @@ public class Weather {
 
     public int index = 99999;
 
+    public Weather(String time, String temperature, String rainyPercent, WeatherCode weatherInfo, String rainyAmount) {
+        this.time = time;
+        this.temperature = temperature;
+        this.rainyPercent = rainyPercent;
+        this.weatherInfo = weatherInfo;
+        this.rainyAmount = rainyAmount;
+    }
+    public Weather(){
+
+    }
     public int getIndex() {
         return index;
     }

@@ -124,6 +124,13 @@ public class HomeFragment extends Fragment implements ItemClickListener {
         startActivity(intent);
     }
 
+    @Override
+    public void onItemMapClick(Schedule item) {
+        Intent intent = new Intent(getActivity(), MapActivity.class);
+        intent.putExtra("scheduleId", item.getScheduleId());
+        startActivity(intent);
+    }
+
 
     @Override
     public void deleteItemClick(Schedule item, int position) {
@@ -158,6 +165,15 @@ public class HomeFragment extends Fragment implements ItemClickListener {
             }
         }).start();
 
+    }
+
+    @Override
+    public void onItemModify(Schedule item) {
+        Intent intent = new Intent(getActivity(), ScheModifyActivity.class);
+        intent.putExtra("scheduleId", item.getScheduleId());
+        intent.putExtra("title", item.getTitle());
+        intent.putExtra("hash", item.getHashTag());
+        startActivity(intent);
     }
 
 

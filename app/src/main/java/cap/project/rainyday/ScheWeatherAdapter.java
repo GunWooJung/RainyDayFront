@@ -1,5 +1,6 @@
 package cap.project.rainyday;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -73,6 +74,7 @@ public class ScheWeatherAdapter extends RecyclerView.Adapter<ScheWeatherAdapter.
             weather_info = itemView.findViewById(R.id.weather_info);
             weather_icon = itemView.findViewById(R.id.weather_icon);
             type = itemView.findViewById(R.id.type);
+            itemView.setOnClickListener(this);
         }
 
         public void bind(Weather item ,int position) {
@@ -188,6 +190,7 @@ public class ScheWeatherAdapter extends RecyclerView.Adapter<ScheWeatherAdapter.
         public void onClick(View v) {
             int position = getAdapterPosition();
             Weather item = Items.get(position);
+            Log.d("aa","a");
             listener.onItemClick(item);
         }
 

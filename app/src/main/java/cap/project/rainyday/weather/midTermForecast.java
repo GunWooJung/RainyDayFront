@@ -1,5 +1,7 @@
 package cap.project.rainyday.weather;
 
+import android.util.Log;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -57,7 +59,7 @@ public class midTermForecast {
         type = null;
     }
 
-    public String getWeather_midTerm_text(String stnId) {
+    public String getWeather_midTerm_text(LocalDateTime base, String stnId) {
         //text 형식의 예보라 필요하지 않음
         //만약 사용한다면 stnId로 다른 코드가 필요
         base = LocalDateTime.now();
@@ -71,8 +73,10 @@ public class midTermForecast {
         type = "중기전망조회";
         int num = 1;
         String api = "http://apis.data.go.kr/1360000/MidFcstInfoService/getMidFcst?dataType=JSON&serviceKey=" + serviceKey + "&numOfRows=" + num + "pageNo=1&stnId=" + stnId + "&tmFc=" + base.format(DateTimeFormatter.ofPattern("yyyyMMddHHmm"));
+        Log.d("mid", api);
         JsonObject responseJson = GetJson.getJson(api);
-        return null;
+        Log.d("mid2", responseJson.toString());
+        return "a";
                 //(String) (((JsonObject) ((JsonArray) ((JsonObject) ((JsonObject) ((JsonObject) responseJson.get("response")).get("body")).get("items")).get("item")).get(0))).get("wfSv");
     }
 
@@ -95,6 +99,7 @@ public class midTermForecast {
             int pageNo = 1; // 1400의 예보라면 1페이지에 1500 2페이지에 1500식
             String api = "http://apis.data.go.kr/1360000/MidFcstInfoService/getMidLandFcst?serviceKey=" + serviceKey + "&dataType=JSON&numOfRows=" + num + "&pageNo=" + pageNo + "&regId=" + location.regId + "&base_date=" + "&tmFc=" + base.format(DateTimeFormatter.ofPattern("yyyyMMddHHmm"));
             responseJson = GetJson.getJson(api);
+            Log.d("api", api);
             JsonObject item = (JsonObject) ((JsonArray) ((JsonObject) ((JsonObject) ((JsonObject) responseJson.get("response")).get("body")).get("items")).get("item")).get(0);
             for (int i = 0; i < 5; ++i) {
                 weathr[i] = new MidTermWeather();

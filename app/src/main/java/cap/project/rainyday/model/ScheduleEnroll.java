@@ -5,6 +5,17 @@ import com.google.gson.Gson;
 import java.util.List;
 
 public class ScheduleEnroll {
+
+    private long scheduleId;
+
+    public long getScheduleId() {
+        return scheduleId;
+    }
+
+    public void setScheduleId(long scheduleId) {
+        this.scheduleId = scheduleId;
+    }
+
     private String title;
     private String hashTag;
     private List<Location> locations;

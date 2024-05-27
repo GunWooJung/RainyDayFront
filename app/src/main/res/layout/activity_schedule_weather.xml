@@ -121,6 +121,9 @@
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout> <!-- 처음에는 안 보이도록 설정 -->
     </androidx.constraintlayout.widget.ConstraintLayout>
+    <include
+        android:id="@+id/moreBox"
+        layout="@layout/morebox" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"

@@ -15,10 +15,13 @@ import android.widget.Toast;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Scanner;
 
 import cap.project.rainyday.model.User;
 
@@ -88,7 +91,18 @@ public class RegisterActivity extends AppCompatActivity {
                             wr.write(jsonBytes, 0, jsonBytes.length); // 바이트 배열을 전송
                             wr.flush();
                             wr.close();
-
+                            BufferedReader in;
+                            if (con.getResponseCode() >= 400) {
+                                in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+                            } else {
+                                in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                            }
+                            String inputLine;
+                            StringBuilder response = new StringBuilder();
+                            while ((inputLine = in.readLine()) != null) {
+                                response.append(inputLine);
+                            }
+                            in.close();
                             // 응답 받기
                             int responseCode = con.getResponseCode();
                             if (responseCode == HttpURLConnection.HTTP_CREATED) {
@@ -107,7 +121,13 @@ public class RegisterActivity extends AppCompatActivity {
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        showLoginFailedDialog("이미 존재하는 아이디입니다.");
+
+                                        if(response.toString().equals("id")) {
+                                            showLoginFailedDialog("이미 존재하는 아이디입니다.");
+                                        }
+                                        else {
+                                            showLoginFailedDialog("이미 존재하는 이름입니다.");
+                                        }
                                     }
                                 });
                             } else if (responseCode == HttpURLConnection.HTTP_BAD_REQUEST) {

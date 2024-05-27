@@ -12,6 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -46,6 +47,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import cap.project.rainyday.model.DetailWeather;
 import cap.project.rainyday.model.Location;
 import cap.project.rainyday.model.Route;
 
@@ -64,12 +66,21 @@ public class RouteActivity extends AppCompatActivity implements WeatherClickList
     ImageView trash;
 
     private RecyclerView recyclerView;
+
+    private RecyclerView recyclerViewDetail;
+
     private static ScheWeatherAdapter adapter;
+    private static CurWeatherAdapter adapterDetail;
     private ProgressBar loadingProgressBar;
     private List<Weather> weatherItems;
+    private List<DetailWeather> detailWeather;
 
     private List<Location> FromBackend;
+    LinearLayout moreBoxLayout;
+    TextView detailName;
+    TextView detailExplain;
 
+    Button close;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,12 +92,29 @@ public class RouteActivity extends AppCompatActivity implements WeatherClickList
         backbutton = findViewById(R.id.backbutton);
         recyclerView = findViewById(R.id.weatherList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerViewDetail = findViewById(R.id.detail);
+        recyclerViewDetail.setLayoutManager(new LinearLayoutManager(this));
         adapter = new ScheWeatherAdapter(new ArrayList<>(), this);
+        adapterDetail = new CurWeatherAdapter(getApplicationContext(), new ArrayList<>());
         recyclerView.setAdapter(adapter);
+        recyclerViewDetail.setAdapter(adapterDetail);
         trash = findViewById(R.id.trash);
-
+        moreBoxLayout = findViewById(R.id.moreBox);
+        moreBoxLayout.setVisibility(View.GONE);
+        close = findViewById(R.id.close);
         loadingProgressBar = findViewById(R.id.progressBar);
         loadingProgressBar.setVisibility(View.VISIBLE);
+        detailWeather = new ArrayList<>();
+        detailName = findViewById(R.id.name);
+        close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TextView which = findViewById(R.id.which);
+                //which.setText("(선택된 장소 : 없음)");
+                moreBoxLayout.setVisibility(View.GONE);
+            }
+        });
+
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -132,7 +160,7 @@ public class RouteActivity extends AppCompatActivity implements WeatherClickList
                                                         Toast.makeText(getApplicationContext(), "일정이 삭제되었습니다.", Toast.LENGTH_SHORT).show();
                                                     }
                                                 });
-                                                 } else {
+                                            } else {
                                                 // 응답이 200이 아닌 경우 에러 처리
                                                 Log.e("err", "HTTP error code: " + responseCode);
                                             }
@@ -232,7 +260,7 @@ public class RouteActivity extends AppCompatActivity implements WeatherClickList
                                 locationDest.setNy(scheduleObject.get("ny").getAsInt());
                                 locationDest.setRegioncode(scheduleObject.get("regioncode").getAsString());
                                 FromBackend.add(locationDest);
-                                
+
                                 Location locationDepart = new Location();
                                 locationDepart.setName(scheduleObject.get("name").getAsString());
                                 locationDepart.setTime(scheduleObject.get("departTime").getAsString());
@@ -272,37 +300,127 @@ public class RouteActivity extends AppCompatActivity implements WeatherClickList
                                     if (daysDifference >= 0 && daysDifference <= 2) {
                                         ShortTermForeacast weather_f = new ShortTermForeacast(weatherLocation);
                                         ShortTermWeather weather_s[] = weather_f.getWeather();
+                                        DetailWeather detailItem = new DetailWeather();
+                                        detailItem.setIndex(index);
+                                        Boolean first = false;
+                                        int count = 0;
+                                        String tempWeather = "";
                                         //저는 for문으로 모두 출력했지만 첫번째 인덱스의 시간과 날짜를 보고 몇시간 후인지 전인지 보고 인덱스를 더하고 몇일 뒤인지에 따라 24만큼 인덱스를 더해서 빠르게 접근가능합니다
-                                        for (ShortTermWeather weather : weather_s) {
-                                            if (!weather.fcst.format(DateTimeFormatter.ofPattern("ddHH")).
-                                                    equals(dateTime.format(DateTimeFormatter.ofPattern("ddHH")))) {
-                                                continue;
-                                            }
+                                        for (int k = 0; k < weather_s.length; k++) {
+                                            if (first == false) {
+                                                ShortTermWeather weather = weather_s[k];
+                                                if (!weather.fcst.format(DateTimeFormatter.ofPattern("ddHH")).
+                                                        equals(dateTime.format(DateTimeFormatter.ofPattern("ddHH")))) {
+                                                    continue;
+                                                }
 
-                                            weatherItem.setTemperature(weather.tmp + "ºC");
-                                            weatherItem.setRainyPercent(weather.pop + "%");
-                                            weatherItem.setRainyAmount(weather.pcp);
-                                            weatherItem.setWeatherInfo(weather.wCode);
-                                            weatherItem.setType(0);
-                                            weatherItems.add(weatherItem);
-                                            break;
+                                                weatherItem.setTemperature(weather.tmp + "ºC");
+                                                weatherItem.setRainyPercent(weather.pop + "%");
+                                                weatherItem.setRainyAmount(weather.pcp);
+                                                weatherItem.setWeatherInfo(weather.wCode);
+                                                weatherItem.setType(0);
+                                                weatherItems.add(weatherItem);
+
+                                                //detailItem.weather.add(weatherItem);
+                                                first = true;
+                                                tempWeather = String.valueOf(weather.fcst);
+
+                                            } else if (first == true && count <= 5) {
+                                                ShortTermWeather weather = weather_s[k];
+                                                Weather weatherItem2 = new Weather();
+                                                if (tempWeather.equals(String.valueOf(weather.fcst)))
+                                                    continue;
+                                                weatherItem2.setTemperature(weather.tmp + "ºC");
+                                                weatherItem2.setTime(weather.fcst.format(DateTimeFormatter.ofPattern("ddHHmm")).substring(0, 2) +
+                                                        "일 " + weather.fcst.format(DateTimeFormatter.ofPattern("ddHHmm")).substring(2, 4) +
+                                                        "시 " + weather.fcst.format(DateTimeFormatter.ofPattern("ddHHmm")).substring(4, 6) +
+                                                        "분");
+
+                                                weatherItem2.setRainyPercent(weather.pop + "%");
+                                                weatherItem2.setRainyAmount(weather.pcp);
+                                                weatherItem2.setWeatherInfo(weather.wCode);
+                                                weatherItem2.setType(0);
+                                                detailItem.weather.add(weatherItem2);
+                                                count++;
+                                                Log.d("aa", weather.tmp + "ºC");
+                                                tempWeather = String.valueOf(weather.fcst);
+                                            } else {
+                                                break;
+                                            }
                                         }
+                                        detailItem.setType(0);
+                                        detailWeather.add(detailItem);
                                     } else if (daysDifference >= 3 && daysDifference <= 10) {
+                                        DetailWeather detailItem = new DetailWeather();
+                                        detailItem.setIndex(index);
                                         midTermForecast midTerm = new midTermForecast(weatherLocation);
                                         //중기 예보의 경우 0600 1800에만 발표
                                         // midTerm.getWeather_midTerm();
                                         MidTermWeather weather_m[] = midTerm.getWeather_midTerm_get_all();
-                                        //0 인덱스부터 3일후 7인덱스가 10일 후 입니다
 
+                                        //0 인덱스부터 3일후 7인덱스가 10일 후 입니다
+                                        LocalDateTime nowDate = LocalDateTime.now();
+                                        nowDate = nowDate.plusDays(3);
+                                        nowDate = nowDate.withHour(5).withMinute(0).withSecond(0).withNano(0);
                                         for (int j = 0; j < 8; ++j) {
-                                            if (daysDifference == (j + 3)) {
-                                                weatherItem.setRainyPercent(weather_m[j].rnStAm + "%");
-                                                weatherItem.setWeatherInfo(weather_m[j].wfAm);
-                                                weatherItem.setType(1);
-                                                weatherItems.add(weatherItem);
-                                                break;
+                                            if (j >= 0 && j <= 4) {
+
+                                                    Weather weatherItem2 = new Weather();
+                                                    weatherItem2.setTime(nowDate.format(DateTimeFormatter.ofPattern("dd")) +
+                                                            "일 오전");
+                                                    weatherItem2.setRainyPercent(weather_m[j].rnStAm + "%");
+                                                    weatherItem2.setWeatherInfo(weather_m[j].wfAm);
+                                                    weatherItem2.setRainyAmount("");
+                                                    weatherItem2.setTemperature("");
+                                                    weatherItem2.setType(1);
+                                                    detailItem.weather.add(weatherItem2);
+                                                    nowDate = nowDate.plusHours(12);
+
+                                                    Weather weatherItem3 = new Weather();
+                                                weatherItem3.setTime(nowDate.format(DateTimeFormatter.ofPattern("dd")) +
+                                                            "일 오후");
+                                                weatherItem3.setRainyPercent(weather_m[j].rnStPm + "%");
+                                                weatherItem3.setWeatherInfo(weather_m[j].wfPm);
+                                                weatherItem3.setRainyAmount("");
+                                                weatherItem3.setTemperature("");
+                                                weatherItem3.setType(1);
+                                                    detailItem.weather.add(weatherItem3);
+                                                    nowDate = nowDate.plusHours(12);
+
+                                            } else {
+                                                Weather weatherItem2 = new Weather();
+                                                weatherItem2.setTime(nowDate.format(DateTimeFormatter.ofPattern("dd")) +
+                                                        "일");
+                                                weatherItem2.setRainyPercent(weather_m[j].rnStAm + "%");
+                                                weatherItem2.setWeatherInfo(weather_m[j].wfAm);
+                                                weatherItem2.setRainyAmount("");
+                                                weatherItem2.setTemperature("");
+                                                weatherItem2.setType(1);
+                                                detailItem.weather.add(weatherItem2);
+                                                nowDate = nowDate.plusHours(24);
                                             }
+
+
+                                            if (daysDifference == (j + 3)) {
+                                                if (dateTime.getHour() < 12) {
+                                                    weatherItem.setRainyPercent(weather_m[j].rnStAm + "%");
+                                                    weatherItem.setWeatherInfo(weather_m[j].wfAm);
+                                                    weatherItem.setType(1);
+                                                    weatherItems.add(weatherItem);
+                                                    //break;
+                                                } else {
+                                                    weatherItem.setRainyPercent(weather_m[j].rnStPm + "%");
+                                                    weatherItem.setWeatherInfo(weather_m[j].wfPm);
+                                                    weatherItem.setType(1);
+                                                    weatherItems.add(weatherItem);
+                                                    //break;
+                                                }
+                                            }
+
                                         }
+
+                                        detailItem.setType(1);
+                                        detailWeather.add(detailItem);
                                     } else {
                                         weatherItem.setType(2); //10일 이후
                                         weatherItems.add(weatherItem);
@@ -341,6 +459,31 @@ public class RouteActivity extends AppCompatActivity implements WeatherClickList
 
     @Override
     public void onItemClick(Weather item) {
-
+        if (moreBoxLayout.getVisibility() == View.VISIBLE) {
+            if ((int) moreBoxLayout.getTag() == item.getIndex()) {
+                moreBoxLayout.setVisibility(View.GONE);
+            } else {
+                moreBoxLayout.setTag(item.getIndex());
+                detailName.setText("더보기(" + item.getLocation() + ")");
+                for (DetailWeather d : detailWeather) {
+                    if (d.getIndex() == item.getIndex()) {
+                        adapterDetail.setWeatherList(d.weather);
+                        adapterDetail.notifyDataSetChanged();
+                        break;
+                    }
+                }
+            }
+        } else if (moreBoxLayout.getVisibility() == View.GONE) {
+            moreBoxLayout.setVisibility(View.VISIBLE);
+            moreBoxLayout.setTag(item.getIndex());
+            detailName.setText("더보기(" + item.getLocation() + ")");
+            for (DetailWeather d : detailWeather) {
+                if (d.getIndex() == item.getIndex()) {
+                    adapterDetail.setWeatherList(d.weather);
+                    adapterDetail.notifyDataSetChanged();
+                    break;
+                }
+            }
+        }
     }
 }

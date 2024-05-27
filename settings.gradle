@@ -1,17 +1,25 @@
+// settings.gradle 파일
+
 pluginManagement {
     repositories {
         google()
         mavenCentral()
-        gradlePluginPortal()
+        maven {
+            url 'https://repository.map.naver.com/archive/maven'
+        }
     }
 }
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
+        maven {
+            url 'https://repository.map.naver.com/archive/maven'
+        }
     }
 }
 
-rootProject.name = "RainyDay"
+rootProject.name = "cap.project.rainyday"
 include ':app'

@@ -1,6 +1,10 @@
 package cap.project.rainyday;
 
+import static androidx.core.content.ContextCompat.startActivity;
+
+import android.app.Activity;
 import android.app.Application;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Handler;
@@ -27,9 +31,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -38,13 +44,18 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import cap.project.rainyday.model.Schedule;
+import cap.project.rainyday.model.User;
+import cap.project.rainyday.tool.LoginSharedPreferences;
 
 public class ScheAdapter extends RecyclerView.Adapter<ScheAdapter.ViewHolder> {
 
     private List<Schedule> Items;
     private ItemClickListener listener;
 
+    //private Context context;
+
     public ScheAdapter(List<Schedule> Items, ItemClickListener listener) {
+        // this.context = context;
         this.Items = Items;
         this.listener = listener;
     }
@@ -80,6 +91,7 @@ public class ScheAdapter extends RecyclerView.Adapter<ScheAdapter.ViewHolder> {
         private TextView hashTag;
 
         private ImageButton sche_dots;
+        ImageButton map;
 
 
         public ViewHolder(@NonNull View itemView) {
@@ -91,7 +103,16 @@ public class ScheAdapter extends RecyclerView.Adapter<ScheAdapter.ViewHolder> {
             hashTag = itemView.findViewById(R.id.tag);
             itemView.setOnClickListener(this);
             sche_dots = itemView.findViewById(R.id.sche_dots);
-
+            map =  itemView.findViewById(R.id.mapButton);
+            map.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int position = getAdapterPosition();
+                    Schedule item = Items.get(position);
+                    listener.onItemMapClick(item);
+                    // 기능1 선택 시 실행할 코드
+                }
+            });
             itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
@@ -99,7 +120,7 @@ public class ScheAdapter extends RecyclerView.Adapter<ScheAdapter.ViewHolder> {
                     Schedule item = Items.get(position);
                     AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
                     builder.setTitle("일정 삭제")
-                            .setMessage(item.getTitle()+" 일정을 정말로 삭제하시겠습니까?")
+                            .setMessage(item.getTitle() + " 일정을 정말로 삭제하시겠습니까?")
                             .setPositiveButton("예", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
@@ -114,7 +135,7 @@ public class ScheAdapter extends RecyclerView.Adapter<ScheAdapter.ViewHolder> {
             });
         }
 
-        public void bind(Schedule item ,int position) {
+        public void bind(Schedule item, int position) {
             LocalDateTime time = LocalDateTime.parse(item.getDepartTime());
             LocalDateTime currentTime = LocalDateTime.now();
             long daysDifference = ChronoUnit.DAYS.between(time.toLocalDate(), currentTime.toLocalDate());
@@ -138,7 +159,6 @@ public class ScheAdapter extends RecyclerView.Adapter<ScheAdapter.ViewHolder> {
 
             DDAY.setText(ddaytoString);
             hashTag.setText(item.getHashTag());
-
 
             sche_dots.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -167,10 +187,8 @@ public class ScheAdapter extends RecyclerView.Adapter<ScheAdapter.ViewHolder> {
                                     return true;
                                 case "일정 수정":
                                     // 기능2 선택 시 실행할 코드
-
-
+                                    listener.onItemModify(item);
                                     return true;
-
                                 case "공유 하기":
                                     // 기능2 선택 시 실행할 코드
                                     AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
@@ -186,9 +204,50 @@ public class ScheAdapter extends RecyclerView.Adapter<ScheAdapter.ViewHolder> {
                                             String userInput = input.getText().toString();
                                             if (userInput.isEmpty()) {
                                                 Toast.makeText(v.getContext(), "입력되지 않아 취소되었습니다.", Toast.LENGTH_SHORT).show();
-                                            }
-                                            else{
-                                                Toast.makeText(v.getContext(), "일정이 공유되었습니다.", Toast.LENGTH_SHORT).show();
+                                            } else {
+
+                                                new Thread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+
+                                                        // HTTP 요청 보내기
+                                                        try {
+                                                            String url = "http://ec2-54-144-194-174.compute-1.amazonaws.com/schedule/" + item.getScheduleId() + "/share?name=" + userInput;
+                                                            URL obj = new URL(url);
+                                                            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+                                                            // HTTP 요청 설정
+                                                            con.setRequestMethod("GET");
+                                                            con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+
+                                                            // 응답 받기
+                                                            int responseCode = con.getResponseCode();
+                                                            if (responseCode == HttpURLConnection.HTTP_OK) {
+                                                                ((Activity) v.getContext()).runOnUiThread(new Runnable() {
+                                                                    @Override
+                                                                    public void run() {
+                                                                        Toast.makeText(v.getContext(), "일정이 공유되었습니다.", Toast.LENGTH_SHORT).show();
+                                                                    }
+                                                                });
+                                                            } else {
+                                                                ((Activity) v.getContext()).runOnUiThread(new Runnable() {
+                                                                    @Override
+                                                                    public void run() {
+                                                                        AlertDialog.Builder builder2 = new AlertDialog.Builder(v.getContext());
+                                                                        builder2.setTitle("공유 실패")
+                                                                                .setMessage("올바르지 않은 이름입니다.")
+                                                                                .setPositiveButton("예", null)
+                                                                                .show();
+                                                                    }
+                                                                });
+
+                                                            }
+                                                        } catch (Exception e) {
+                                                            e.printStackTrace();
+                                                        }
+                                                    }
+
+                                                }).start();
                                             }
                                         }
                                     });
@@ -204,11 +263,11 @@ public class ScheAdapter extends RecyclerView.Adapter<ScheAdapter.ViewHolder> {
                                     return true;
                                 case "일정 삭제":
                                     // 기능3 선택 시 실행할 코드
-                                   // Toast.makeText(v.getContext(), item.getScheduleId() + "일정 삭제", Toast.LENGTH_SHORT).show();
+                                    // Toast.makeText(v.getContext(), item.getScheduleId() + "일정 삭제", Toast.LENGTH_SHORT).show();
 
                                     AlertDialog.Builder builder2 = new AlertDialog.Builder(v.getContext());
                                     builder2.setTitle("일정 삭제")
-                                            .setMessage(item.getTitle()+" 일정을 정말로 삭제하시겠습니까?")
+                                            .setMessage(item.getTitle() + " 일정을 정말로 삭제하시겠습니까?")
                                             .setPositiveButton("예", new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialog, int which) {
@@ -230,6 +289,7 @@ public class ScheAdapter extends RecyclerView.Adapter<ScheAdapter.ViewHolder> {
                 }
             });
 
+
         }
 
 
@@ -245,7 +305,7 @@ public class ScheAdapter extends RecyclerView.Adapter<ScheAdapter.ViewHolder> {
             int position = getAdapterPosition();
             Schedule item = Items.get(position);
             listener.deleteItemClick(item, position);
-            Log.d("ABE" , "a1");
+            Log.d("ABE", "a1");
         }
 
     }

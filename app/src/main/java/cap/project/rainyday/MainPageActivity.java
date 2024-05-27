@@ -29,6 +29,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.gson.Gson;
@@ -38,15 +40,18 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import cap.project.rainyday.R.id;
 import cap.project.rainyday.model.Schedule;
+import cap.project.rainyday.model.User;
 import cap.project.rainyday.tool.LoginSharedPreferences;
 import cap.project.rainyday.tool.SortSharedPreferences;
 
@@ -227,12 +232,63 @@ public class MainPageActivity extends AppCompatActivity {
                             String userInput = input.getText().toString();
                             if (userInput.isEmpty()) {
                                 Toast.makeText(getApplicationContext(), "입력되지 않아 변경이 취소되었습니다.", Toast.LENGTH_SHORT).show();
+                            } else {
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        // JSON 형식으로 데이터 생성
+                                        User user = new User();
+                                        user.setPassword(userInput);
+                                        String json = user.toJson();
+
+                                        // HTTP 요청 보내기
+                                        try {
+                                            String url = "http://ec2-54-144-194-174.compute-1.amazonaws.com/user/" + userId + "/password";
+                                            URL obj = new URL(url);
+                                            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+                                            // HTTP 요청 설정
+                                            con.setRequestMethod("PUT");
+                                            con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                                            con.setDoOutput(true);
+
+                                            // JSON 데이터 전송
+                                            DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+                                            byte[] jsonBytes = json.getBytes(StandardCharsets.UTF_8); // UTF-8로 인코딩된 바이트 배열 얻기
+                                            wr.write(jsonBytes, 0, jsonBytes.length); // 바이트 배열을 전송
+                                            wr.flush();
+                                            wr.close();
+
+                                            // 응답 받기
+                                            int responseCode = con.getResponseCode();
+                                            if (responseCode == HttpURLConnection.HTTP_OK) {
+                                                runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        Toast.makeText(getApplicationContext(), "비밀번호가 변경되었습니다.", Toast.LENGTH_SHORT).show();
+                                                    }
+                                                });
+
+                                            } else if (responseCode == HttpURLConnection.HTTP_BAD_REQUEST) {
+                                                runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        Toast.makeText(getApplicationContext(), "잘못된 요청입니다.", Toast.LENGTH_SHORT).show();
+                                                    }
+                                                });
+                                            } else {
+                                                Log.d("login", "로그인 실패");
+                                            }
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+
+                                    }
+                                }).start();
                             }
-                            else{
-                                Toast.makeText(getApplicationContext(), "비밀번호가 변경되었습니다.", Toast.LENGTH_SHORT).show();
-                            }
+
                         }
-                        });
+                    });
 
                     builder.setNegativeButton("취소", new DialogInterface.OnClickListener() {
                         @Override
