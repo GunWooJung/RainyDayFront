@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -22,6 +23,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;
 
 import com.google.android.gms.common.api.Status;
 import com.google.android.libraries.places.api.Places;
@@ -53,6 +55,7 @@ public class ScheduleAddActivity extends AppCompatActivity {
     TextView departPlace, destPlace;
 
     Button stopoverAdd, close, enroll;
+    ImageButton dots;
 
     int departYear, departMonth, departDay, departHour, departMinute;
     LinearLayout container;
@@ -150,6 +153,49 @@ public class ScheduleAddActivity extends AppCompatActivity {
         enroll = findViewById(R.id.sche_enroll);
 
         close = findViewById(R.id.close);
+        dots = findViewById(R.id.dots);
+        dots.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopupMenu popupMenu = new PopupMenu(ScheduleAddActivity.this, v);
+                // 팝업 메뉴에 아이템 추가
+                popupMenu.getMenu().add("가장 맑은 날 찾기");
+                popupMenu.getMenu().add("놀러갈 곳 추천");
+                popupMenu.getMenu().add("자주 방문한 장소 목록");
+
+                // 팝업 메뉴 아이템 클릭 리스너 설정
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        // 클릭된 아이템에 따라 처리
+                        switch (item.getTitle().toString()) {
+
+                            case "가장 맑은 날 찾기":
+                                // 기능2 선택 시 실행할 코드
+                                Intent intent = new Intent(ScheduleAddActivity.this, CleanDayActivity.class);
+                                startActivity(intent);
+                                Toast.makeText(ScheduleAddActivity.this, "가장 맑은 날 찾기", Toast.LENGTH_SHORT).show();
+                                return true;
+                            case "놀러갈 곳 추천":
+                                // 기능2 선택 시 실행할 코드
+                                Intent intent2 = new Intent(ScheduleAddActivity.this, ReviewActivity.class);
+                                startActivity(intent2);
+                                Toast.makeText(ScheduleAddActivity.this, "놀러갈 곳 추천", Toast.LENGTH_SHORT).show();
+                                return true;
+                            case "자주 방문한 장소 목록":
+                                Intent intent3 = new Intent(ScheduleAddActivity.this, VisitCountActivity.class);
+                                startActivity(intent3);
+                                Toast.makeText(ScheduleAddActivity.this, "자주 방문한 장소 목록", Toast.LENGTH_SHORT).show();
+                                return true;
+                            default:
+                                return false;
+                        }
+                    }
+                });
+                // 팝업 메뉴 표시
+                popupMenu.show();
+            }
+        });
         if (!Places.isInitialized()) {
             Places.initialize(getApplicationContext(), "AIzaSyBI_xKrXy81n7ELWopYZi15QMKJ0rQrL6Q");
         }

@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 public class LoginSharedPreferences {
     // SharedPreferences 이름 정의
     private static final String PREF_USER_ID = "PREF_USER_ID";
+    private static final String PREF_LOGIN_ID = "PREF_LOGIN_ID";
 
     private static final String PREF_USER_NAME = "PREF_USER_NAME";
 
@@ -22,6 +23,17 @@ public class LoginSharedPreferences {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(PREF_USER_NAME, name);
         editor.apply();
+    }
+
+    public static void saveLoginrId(Context context, String loginId) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_LOGIN_ID, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(PREF_LOGIN_ID, loginId);
+        editor.apply();
+    }
+    public static String getLoginId(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_LOGIN_ID, Context.MODE_PRIVATE);
+        return sharedPreferences.getString(PREF_LOGIN_ID, "");
     }
 
     // SharedPreferences에서 사용자 ID를 가져오는 메서드

@@ -82,4 +82,6 @@ dependencies {
     implementation "androidx.navigation:navigation-fragment:2.4.0"
     implementation "androidx.navigation:navigation-ui:2.4.0"
     implementation "com.naver.maps:map-sdk:3.18.0"
+    implementation 'com.google.android.gms:play-services-location:21.0.1'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
 }

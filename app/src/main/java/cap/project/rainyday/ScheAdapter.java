@@ -1,14 +1,15 @@
 package cap.project.rainyday;
 
-import static androidx.core.content.ContextCompat.startActivity;
-
 import android.app.Activity;
-import android.app.Application;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Handler;
-import android.os.Looper;
+import android.content.SharedPreferences;
+import android.graphics.PorterDuff;
+import android.os.Build;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -20,32 +21,22 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.PopupMenu;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Calendar;
 import java.util.List;
 
 import cap.project.rainyday.model.Schedule;
-import cap.project.rainyday.model.User;
-import cap.project.rainyday.tool.LoginSharedPreferences;
+import cap.project.rainyday.tool.NotificationReceiver;
 
 public class ScheAdapter extends RecyclerView.Adapter<ScheAdapter.ViewHolder> {
 
@@ -82,6 +73,18 @@ public class ScheAdapter extends RecyclerView.Adapter<ScheAdapter.ViewHolder> {
         return Items.size();
     }
 
+
+
+    public void cancelAlarm(Context context, int requestCode) {
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
+        Intent intent = new Intent(context, NotificationReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, requestCode, intent, PendingIntent.FLAG_IMMUTABLE);
+
+        alarmManager.cancel(pendingIntent);
+        pendingIntent.cancel();
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private TextView title;
@@ -91,7 +94,7 @@ public class ScheAdapter extends RecyclerView.Adapter<ScheAdapter.ViewHolder> {
         private TextView hashTag;
 
         private ImageButton sche_dots;
-        ImageButton map;
+        ImageButton map, bellButton;
 
 
         public ViewHolder(@NonNull View itemView) {
@@ -103,7 +106,10 @@ public class ScheAdapter extends RecyclerView.Adapter<ScheAdapter.ViewHolder> {
             hashTag = itemView.findViewById(R.id.tag);
             itemView.setOnClickListener(this);
             sche_dots = itemView.findViewById(R.id.sche_dots);
-            map =  itemView.findViewById(R.id.mapButton);
+            map = itemView.findViewById(R.id.mapButton);
+            bellButton = itemView.findViewById(R.id.bellButton);
+
+
             map.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -159,6 +165,14 @@ public class ScheAdapter extends RecyclerView.Adapter<ScheAdapter.ViewHolder> {
 
             DDAY.setText(ddaytoString);
             hashTag.setText(item.getHashTag());
+            SharedPreferences sharedPreferences = itemView.getContext().getSharedPreferences("schedule" + item.getScheduleId(), Context.MODE_PRIVATE);
+            int bell_on = sharedPreferences.getInt("schedule" + item.getScheduleId(), 0);
+            if (bell_on == 1) {
+                bellButton.setImageResource(R.drawable.ic_bellon);
+            }
+            else{
+                bellButton.setImageResource(R.drawable.ic_belloff);
+            }
 
             sche_dots.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -166,11 +180,12 @@ public class ScheAdapter extends RecyclerView.Adapter<ScheAdapter.ViewHolder> {
 
                     PopupMenu popupMenu = new PopupMenu(v.getContext(), v);
                     // 팝업 메뉴에 아이템 추가
-                    popupMenu.getMenu().add("비 예보 설정");
+                    //popupMenu.getMenu().add("비 예보 설정");
                     popupMenu.getMenu().add("일정 보기");
                     popupMenu.getMenu().add("일정 수정");
                     popupMenu.getMenu().add("일정 삭제");
                     popupMenu.getMenu().add("공유 하기");
+                    popupMenu.getMenu().add("리뷰 남기기");
                     // 팝업 메뉴 아이템 클릭 리스너 설정
                     popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                         @Override
@@ -181,9 +196,10 @@ public class ScheAdapter extends RecyclerView.Adapter<ScheAdapter.ViewHolder> {
                                     // 기능1 선택 시 실행할 코드
                                     listener.onItemClick(item);
                                     return true;
-                                case "비 예보 설정":
+
+                                case "리뷰 남기기":
                                     // 기능1 선택 시 실행할 코드
-                                    Toast.makeText(v.getContext(), item.getScheduleId() + "비 예보 설정", Toast.LENGTH_SHORT).show();
+                                    listener.onItemReview(item);
                                     return true;
                                 case "일정 수정":
                                     // 기능2 선택 시 실행할 코드
@@ -289,7 +305,42 @@ public class ScheAdapter extends RecyclerView.Adapter<ScheAdapter.ViewHolder> {
                 }
             });
 
+            bellButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
 
+
+                    SharedPreferences sharedPreferences = itemView.getContext().getSharedPreferences("schedule" + item.getScheduleId(), Context.MODE_PRIVATE);
+                    int bell_on = sharedPreferences.getInt("schedule" + item.getScheduleId(), 0);
+
+                    if (bell_on == 1) {
+                        SharedPreferences share = itemView.getContext().getSharedPreferences("schedule" + item.getScheduleId(), Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = share.edit();
+                        editor.putInt("schedule" + item.getScheduleId(), 0);
+                        editor.apply();
+
+                        bellButton.setImageResource(R.drawable.ic_belloff);
+                        cancelAlarm(itemView.getContext(), (int) item.getScheduleId());
+                        Toast.makeText(v.getContext(), "일정 알림이 해제되었습니다.", Toast.LENGTH_SHORT).show();
+                    } else if (bell_on == 0) {
+                        SharedPreferences share = itemView.getContext().getSharedPreferences("schedule" + item.getScheduleId(), Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = share.edit();
+                        editor.putInt("schedule" + item.getScheduleId(), 1);
+                        editor.apply();
+
+                        bellButton.setImageResource(R.drawable.ic_bellon);
+                        LocalDateTime departTime = LocalDateTime.parse(item.getDepartTime());
+                        if (itemView.getContext() instanceof MainPageActivity) {
+                            ((MainPageActivity) itemView.getContext()).scheduleNotification(itemView.getContext(), departTime, item.getTitle(), item.getScheduleId());
+
+                        } else {
+                            // 현재 컨텍스트가 MainActivity가 아닌 경우
+                        }
+                        Toast.makeText(v.getContext(), "일정 알림이 설정되었습니다.", Toast.LENGTH_SHORT).show();
+                    }
+
+                }
+            });
         }
 
 

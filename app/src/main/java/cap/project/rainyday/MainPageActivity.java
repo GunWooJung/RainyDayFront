@@ -3,7 +3,7 @@ package cap.project.rainyday;
 import static cap.project.rainyday.R.*;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
@@ -12,12 +12,14 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.NavController;
-import androidx.navigation.fragment.NavHostFragment;
-import androidx.navigation.ui.NavigationUI;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,10 +31,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -45,7 +46,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
@@ -53,6 +56,7 @@ import cap.project.rainyday.R.id;
 import cap.project.rainyday.model.Schedule;
 import cap.project.rainyday.model.User;
 import cap.project.rainyday.tool.LoginSharedPreferences;
+import cap.project.rainyday.tool.NotificationReceiver;
 import cap.project.rainyday.tool.SortSharedPreferences;
 
 public class MainPageActivity extends AppCompatActivity {
@@ -70,7 +74,7 @@ public class MainPageActivity extends AppCompatActivity {
 
     // 하단 바 구성요소
     LinearLayout homeLayout, todayLayout, plusLayout;
-    ImageButton bell, menu, dots, todayImage, homeImage, plusImage, sort, backup;
+    ImageButton bell, menu, dots, todayImage, homeImage, plusImage, sort, backup, searchButton;
     TextView todayText, homeText, plusText, username;
 
 
@@ -102,7 +106,7 @@ public class MainPageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         Intent intent = getIntent();
-        if(intent.getIntExtra("showAdd", 0) == 1){
+        if (intent.getIntExtra("showAdd", 0) == 1) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -175,6 +179,7 @@ public class MainPageActivity extends AppCompatActivity {
         // Find the views from the layout
         drawerLayout = findViewById(R.id.drawer_layout);
         navView = findViewById(R.id.nav_view);
+
         backup.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -309,6 +314,7 @@ public class MainPageActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainPageActivity.this, BellActivity.class);
+
                 startActivity(intent);
             }
         });
@@ -318,7 +324,6 @@ public class MainPageActivity extends AppCompatActivity {
             public void onClick(View v) {
                 PopupMenu popupMenu = new PopupMenu(MainPageActivity.this, v);
                 // 팝업 메뉴에 아이템 추가
-                popupMenu.getMenu().add("전체 일정 삭제");
                 popupMenu.getMenu().add("가장 맑은 날 찾기");
                 popupMenu.getMenu().add("놀러갈 곳 추천");
                 popupMenu.getMenu().add("자주 방문한 장소 목록");
@@ -329,17 +334,23 @@ public class MainPageActivity extends AppCompatActivity {
                     public boolean onMenuItemClick(MenuItem item) {
                         // 클릭된 아이템에 따라 처리
                         switch (item.getTitle().toString()) {
-                            case "전체 일정 삭제":
-                                // 기능1 선택 시 실행할 코드
-                                Toast.makeText(MainPageActivity.this, "기능1 선택", Toast.LENGTH_SHORT).show();
-                                return true;
+
                             case "가장 맑은 날 찾기":
                                 // 기능2 선택 시 실행할 코드
-                                Toast.makeText(MainPageActivity.this, "기능2 선택", Toast.LENGTH_SHORT).show();
+                                Intent intent = new Intent(MainPageActivity.this, CleanDayActivity.class);
+                                startActivity(intent);
+                              //  Toast.makeText(MainPageActivity.this, "가장 맑은 날 찾기", Toast.LENGTH_SHORT).show();
                                 return true;
+                            case "놀러갈 곳 추천":
+                                // 기능2 선택 시 실행할 코드
+                                Intent intent2 = new Intent(MainPageActivity.this, ReviewActivity.class);
+                                startActivity(intent2);
+                               // Toast.makeText(MainPageActivity.this, "놀러갈 곳 추천", Toast.LENGTH_SHORT).show();
+                                return true;    
                             case "자주 방문한 장소 목록":
-                                // 기능3 선택 시 실행할 코드
-                                Toast.makeText(MainPageActivity.this, "기능3 선택", Toast.LENGTH_SHORT).show();
+                                Intent intent3 = new Intent(MainPageActivity.this, VisitCountActivity.class);
+                                startActivity(intent3);
+                               // Toast.makeText(MainPageActivity.this, "자주 방문한 장소 목록", Toast.LENGTH_SHORT).show();
                                 return true;
                             default:
                                 return false;
@@ -417,7 +428,62 @@ public class MainPageActivity extends AppCompatActivity {
             loadFragment(new HomeFragment());
         }
 
+
+        TextInputLayout textInputLayout_search = findViewById(R.id.search_layout);
+        TextInputEditText search = (TextInputEditText) textInputLayout_search.getEditText();
+        searchButton = findViewById(R.id.search);
+        searchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String keyword = search.getText().toString();
+                FragmentManager fragmentManager = getSupportFragmentManager(); // 또는 getFragmentManager()을 사용할 수도 있습니다.
+                Fragment fragment = fragmentManager.findFragmentById(R.id.fragment_container); // R.id.fragment_container는 프래그먼트가 호스팅되는 컨테이너의 ID입니다.
+
+                if (fragment instanceof HomeFragment) {
+                    HomeFragment homeFragment = (HomeFragment) fragment;
+                    homeFragment.searchList(keyword); // yourFunction은 실행하려는 함수명입니다.
+                }
+            }
+        });
+
+
     }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void scheduleNotification(Context context, LocalDateTime scheduleTime) {
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
+        // 정확한 알람을 설정할 수 있는 권한 확인
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (!alarmManager.canScheduleExactAlarms()) {
+                Log.e("aa", "Cannot schedule exact alarms. Missing permission or device policy.");
+                // 권한이 없는 경우 권한 요청 로직 추가
+                Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                context.startActivity(intent);
+                return;
+            }
+        }
+
+        // 알람을 수신할 수 있도록 하는 리시버로 인텐트 요청
+        Intent receiverIntent = new Intent(context, NotificationReceiver.class);
+        receiverIntent.putExtra("content", "알람등록 테스트");
+
+        // PendingIntent를 생성할 때 FLAG_IMMUTABLE 플래그 추가
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 123, receiverIntent, PendingIntent.FLAG_IMMUTABLE);
+
+        // 알람 시간 설정
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.YEAR, scheduleTime.getYear());
+        calendar.set(Calendar.MONTH, scheduleTime.getMonthValue() - 1); // Calendar 클래스에서는 월이 0부터 시작하므로 -1
+        calendar.set(Calendar.DAY_OF_MONTH, scheduleTime.getDayOfMonth());
+        calendar.set(Calendar.HOUR_OF_DAY, scheduleTime.getHour());
+        calendar.set(Calendar.MINUTE, scheduleTime.getMinute());
+        calendar.set(Calendar.SECOND, 0);
+
+        // RTC_WAKEUP을 사용하여 기기가 슬립 모드에 있을 때도 알람이 발생하도록 함
+        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+    }
+
 
     private void loadFragment(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -455,6 +521,42 @@ public class MainPageActivity extends AppCompatActivity {
         // 다이얼로그를 생성하고 표시합니다.
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void scheduleNotification(Context context, LocalDateTime scheduleTime, String title, long id) {
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
+        // 정확한 알람을 설정할 수 있는 권한 확인
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (!alarmManager.canScheduleExactAlarms()) {
+                Log.e("aa", "Cannot schedule exact alarms. Missing permission or device policy.");
+                // 권한이 없는 경우 권한 요청 로직 추가
+                Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                context.startActivity(intent);
+                return;
+            }
+        }
+
+
+        // 알람을 수신할 수 있도록 하는 리시버로 인텐트 요청
+        Intent receiverIntent = new Intent(context, NotificationReceiver.class);
+        receiverIntent.putExtra("title", title);
+        receiverIntent.putExtra("schedule", id);
+        Log.d("adgg", title+id);
+        // PendingIntent를 생성할 때 FLAG_IMMUTABLE 플래그 추가
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, (int) id, receiverIntent, PendingIntent.FLAG_UPDATE_CURRENT |PendingIntent.FLAG_IMMUTABLE);
+
+        // 알람 시간 설정
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.YEAR, scheduleTime.getYear());
+        calendar.set(Calendar.MONTH, scheduleTime.getMonthValue() - 1); // Calendar 클래스에서는 월이 0부터 시작하므로 -1
+        calendar.set(Calendar.DAY_OF_MONTH, scheduleTime.getDayOfMonth());
+        calendar.set(Calendar.HOUR_OF_DAY, scheduleTime.getHour());
+        calendar.set(Calendar.MINUTE, scheduleTime.getMinute());
+        calendar.set(Calendar.SECOND, 0);
+
+        // RTC_WAKEUP을 사용하여 기기가 슬립 모드에 있을 때도 알람이 발생하도록 함
+        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
     }
 
     @Override

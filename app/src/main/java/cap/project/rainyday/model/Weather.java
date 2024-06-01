@@ -1,8 +1,9 @@
 package cap.project.rainyday.model;
 
 import cap.project.rainyday.weather.WeatherCode;
+import cap.project.rainyday.weather.getImageNum;
 
-public class Weather {
+public class Weather implements Comparable<Weather> {
 
     private String location;
 
@@ -17,9 +18,11 @@ public class Weather {
         this.weatherInfo = weatherInfo;
         this.rainyAmount = rainyAmount;
     }
-    public Weather(){
+
+    public Weather() {
 
     }
+
     public int getIndex() {
         return index;
     }
@@ -93,4 +96,28 @@ public class Weather {
     private WeatherCode weatherInfo;
 
     private String rainyAmount;
+
+    @Override
+    public int compareTo(Weather other) {   //음수일 경우 this가 앞에
+        int imageNumMe = getImageNum.getNum(this.getWeatherInfo());
+        int imageNumOther = getImageNum.getNum(other.getWeatherInfo());
+        if (imageNumMe < imageNumOther) {
+            return -1;
+        }
+        if (imageNumMe > imageNumOther) {
+            return 1;
+        } else {
+            int mePercent = Integer.parseInt(this.getRainyPercent().replace("%", ""));
+            int otherPercent = Integer.parseInt(other.getRainyPercent().replace("%", ""));
+            if (mePercent < otherPercent) {
+                return -1;
+            } else if (mePercent > otherPercent) {
+                return 1;
+            }
+            else{
+                return -1;
+            }
+        }
+    }
+
 }

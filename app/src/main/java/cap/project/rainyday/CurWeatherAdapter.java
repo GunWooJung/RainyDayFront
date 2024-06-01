@@ -73,11 +73,18 @@ public class CurWeatherAdapter extends RecyclerView.Adapter<CurWeatherAdapter.Vi
                 rainAmount.setText("강수량 : " + item.getRainyAmount());
                 rainPercent.setText("강수 확률 : " + item.getRainyPercent());
             }
+            else if(item.getType() == 9){
+                locationTemperature.setText("");
+                rainAmount.setText("");
+                rainPercent.setText("강수 확률 : " + item.getRainyPercent());
+            }
             else{
                 locationTemperature.setText("");
                 rainAmount.setText("");
                 rainPercent.setText("강수 확률 : " + item.getRainyPercent());
             }
+
+
 
 
             int imageNum = getImageNum.getNum(item.getWeatherInfo());

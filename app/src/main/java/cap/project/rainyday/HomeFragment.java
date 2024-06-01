@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -23,11 +24,14 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -63,6 +67,7 @@ public class HomeFragment extends Fragment implements ItemClickListener {
     TextView addtextView;
 
     ProgressBar progressBar;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     public static ScheAdapter getAdapter() {
         return adapter;
@@ -98,6 +103,7 @@ public class HomeFragment extends Fragment implements ItemClickListener {
         addtextView.setVisibility(View.GONE);
         progressBar = view.findViewById(R.id.progressBarMain);
         progressBar.setVisibility(View.VISIBLE);
+        swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_layout);
         addbutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -105,6 +111,28 @@ public class HomeFragment extends Fragment implements ItemClickListener {
                 startActivity(intent);
             }
         });
+
+// SwipeRefreshLayout 새로고침 리스너 설정
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+
+                if (scheItems.size() != 0) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            updateList(true);
+
+                            swipeRefreshLayout.setRefreshing(false);
+                        }
+                    });
+                    // 새로고침 완료 표시 제거
+                }
+
+            }
+        });
+
+
         return view;
     }
 
@@ -176,6 +204,13 @@ public class HomeFragment extends Fragment implements ItemClickListener {
         startActivity(intent);
     }
 
+    @Override
+    public void onItemReview(Schedule item) {
+        Intent intent = new Intent(getActivity(), EnrollReviewActivity.class);
+        intent.putExtra("scheduleId", item.getScheduleId());
+        startActivity(intent);
+    }
+
 
     public void updateList(Boolean fetchBackend) {
         int sort = SortSharedPreferences.getSort(getActivity().getApplicationContext());
@@ -221,10 +256,9 @@ public class HomeFragment extends Fragment implements ItemClickListener {
                             Log.d("ssss", schedule.getTitle());
                             scheItems.add(schedule);
                         }
-                        if(sort == 0){ // "최근 등록 순"
+                        if (sort == 0) { // "최근 등록 순"
                             Collections.reverse(scheItems);
-                        }
-                        else if(sort == 1){ // "가까운 일정 순"
+                        } else if (sort == 1) { // "가까운 일정 순"
                             Collections.sort(scheItems, new Schedule.ScheduleComparator());
                         }
                         getActivity().runOnUiThread(new Runnable() {
@@ -239,8 +273,7 @@ public class HomeFragment extends Fragment implements ItemClickListener {
                             }
                         });
 
-                    }
-                    else if(responseCode == HttpURLConnection.HTTP_NO_CONTENT){
+                    } else if (responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -253,8 +286,7 @@ public class HomeFragment extends Fragment implements ItemClickListener {
 
                             }
                         });
-                    }
-                    else {
+                    } else {
                         // 응답이 200이 아닌 경우 에러 처리
                         Log.e("err", "HTTP error code: " + responseCode);
                     }
@@ -309,10 +341,9 @@ public class HomeFragment extends Fragment implements ItemClickListener {
                             Log.d("ssss", schedule.getTitle());
                             scheItems.add(schedule);
                         }
-                        if(sort == 0){ // "최근 등록 순"
+                        if (sort == 0) { // "최근 등록 순"
                             Collections.reverse(scheItems);
-                        }
-                        else if(sort == 1){ // "가까운 일정 순"
+                        } else if (sort == 1) { // "가까운 일정 순"
                             Collections.sort(scheItems, new Schedule.ScheduleComparator());
                         }
                         getActivity().runOnUiThread(new Runnable() {
@@ -325,8 +356,7 @@ public class HomeFragment extends Fragment implements ItemClickListener {
                             }
                         });
 
-                    }
-                    else if(responseCode == HttpURLConnection.HTTP_NO_CONTENT){
+                    } else if (responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
 
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
@@ -335,8 +365,7 @@ public class HomeFragment extends Fragment implements ItemClickListener {
                             }
                         });
 
-                    }
-                    else {
+                    } else {
                         // 응답이 200이 아닌 경우 에러 처리
                         Log.e("err", "HTTP error code: " + responseCode);
                     }
@@ -347,4 +376,23 @@ public class HomeFragment extends Fragment implements ItemClickListener {
         }).start();
     }
 
+    public void searchList(String keyword) {
+
+        List<Schedule> searchItems = new ArrayList<>();
+        for (Schedule item : scheItems) {
+            String title = item.getTitle()
+                    .replace(" ", "");
+            String place = item.getDepartName()
+                    .replace(" ", "");
+            String hash = item.getHashTag()
+                    .replace("#", "")
+                    .replace(" ", "");
+            if (hash.indexOf(keyword) != -1 || title.indexOf(keyword) != -1 || place.indexOf(keyword) != -1) {
+                searchItems.add(item);
+            }
+        }
+        adapter.setItems(searchItems);
+        adapter.notifyDataSetChanged();
+
+    }
 }

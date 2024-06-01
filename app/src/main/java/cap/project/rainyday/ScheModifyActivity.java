@@ -2,12 +2,15 @@ package cap.project.rainyday;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -22,6 +25,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;
 
 import com.google.android.gms.common.api.Status;
 import com.google.android.libraries.places.api.Places;
@@ -73,6 +77,8 @@ public class ScheModifyActivity extends AppCompatActivity {
     private String title;
 
     private String hash;
+    ImageButton dots;
+
 
     private void showDatePickerDialog() {
         // 현재 날짜 가져오기
@@ -157,7 +163,7 @@ public class ScheModifyActivity extends AppCompatActivity {
         searchBoxLayout.setVisibility(View.GONE);
         departPlace = findViewById(R.id.depart_place);
         destPlace = findViewById(R.id.dest_place);
-
+        dots = findViewById(R.id.dots);
         TextInputLayout textInputLayout_title = findViewById(R.id.titleLayout);
         TextInputLayout textInputLayout_hash = findViewById(R.id.hashLayout);
         TextInputEditText titleInput = (TextInputEditText) textInputLayout_title.getEditText();
@@ -168,6 +174,49 @@ public class ScheModifyActivity extends AppCompatActivity {
         enroll = findViewById(R.id.sche_enroll);
 
         close = findViewById(R.id.close);
+
+        dots.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopupMenu popupMenu = new PopupMenu(ScheModifyActivity.this, v);
+                // 팝업 메뉴에 아이템 추가
+                popupMenu.getMenu().add("가장 맑은 날 찾기");
+                popupMenu.getMenu().add("놀러갈 곳 추천");
+                popupMenu.getMenu().add("자주 방문한 장소 목록");
+
+                // 팝업 메뉴 아이템 클릭 리스너 설정
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        // 클릭된 아이템에 따라 처리
+                        switch (item.getTitle().toString()) {
+
+                            case "가장 맑은 날 찾기":
+                                // 기능2 선택 시 실행할 코드
+                                Intent intent = new Intent(ScheModifyActivity.this, CleanDayActivity.class);
+                                startActivity(intent);
+                                Toast.makeText(ScheModifyActivity.this, "가장 맑은 날 찾기", Toast.LENGTH_SHORT).show();
+                                return true;
+                            case "놀러갈 곳 추천":
+                                // 기능2 선택 시 실행할 코드
+                                Intent intent2 = new Intent(ScheModifyActivity.this, ReviewActivity.class);
+                                startActivity(intent2);
+                                Toast.makeText(ScheModifyActivity.this, "놀러갈 곳 추천", Toast.LENGTH_SHORT).show();
+                                return true;
+                            case "자주 방문한 장소 목록":
+                                Intent intent3 = new Intent(ScheModifyActivity.this, VisitCountActivity.class);
+                                startActivity(intent3);
+                                Toast.makeText(ScheModifyActivity.this, "자주 방문한 장소 목록", Toast.LENGTH_SHORT).show();
+                                return true;
+                            default:
+                                return false;
+                        }
+                    }
+                });
+                // 팝업 메뉴 표시
+                popupMenu.show();
+            }
+        });
         if (!Places.isInitialized()) {
             Places.initialize(getApplicationContext(), "AIzaSyBI_xKrXy81n7ELWopYZi15QMKJ0rQrL6Q");
         }
@@ -467,6 +516,7 @@ public class ScheModifyActivity extends AppCompatActivity {
                     showFailedDialog("입력되지 않은 칸이 존재합니다.");
                     return;
                 }
+
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -501,10 +551,13 @@ public class ScheModifyActivity extends AppCompatActivity {
                                     @Override
                                     public void run() {
                                         showToast("일정이 수정되었습니다.");
-
+                                        SharedPreferences share = getSharedPreferences("schedule" + scheduleId, Context.MODE_PRIVATE);
+                                        SharedPreferences.Editor editor = share.edit();
+                                        editor.putInt("schedule" +scheduleId, 0);
+                                        editor.apply();
                                         Intent intent = new Intent(ScheModifyActivity.this, MainPageActivity.class);
                                         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                                        intent.putExtra("showAdd", 1);
+                                        intent.putExtra("showAdd", 0);
                                         startActivity(intent);
                                         finish();
                                     }
@@ -684,7 +737,6 @@ public class ScheModifyActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
 
     }
 

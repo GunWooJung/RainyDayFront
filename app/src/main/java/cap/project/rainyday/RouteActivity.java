@@ -1,5 +1,6 @@
 package cap.project.rainyday;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -25,6 +26,8 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -39,6 +42,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -53,6 +57,7 @@ import cap.project.rainyday.model.Route;
 
 import cap.project.rainyday.model.Schedule;
 import cap.project.rainyday.model.Weather;
+import cap.project.rainyday.tool.LocationManager;
 import cap.project.rainyday.weather.MidTermWeather;
 import cap.project.rainyday.weather.ShortTermForeacast;
 import cap.project.rainyday.weather.ShortTermWeather;
@@ -61,9 +66,11 @@ import cap.project.rainyday.weather.midTermForecast;
 public class RouteActivity extends AppCompatActivity implements WeatherClickListener {
 
     private long scheduleId;
+    private String temptitle;
+    private String temphash;
     ImageButton back;
     Button backbutton;
-    ImageView trash;
+    ImageView write, trash;
 
     private RecyclerView recyclerView;
 
@@ -78,16 +85,70 @@ public class RouteActivity extends AppCompatActivity implements WeatherClickList
     private List<Location> FromBackend;
     LinearLayout moreBoxLayout;
     TextView detailName;
-    TextView detailExplain;
+    TextView title, hash;
 
     Button close;
+
+    private void increaseLocationCount(Context context, long notificationId) {
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String url = "http://ec2-54-144-194-174.compute-1.amazonaws.com/schedule/" + notificationId;
+                    URL obj = new URL(url);
+
+                    HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+                    // HTTP 요청 설정
+                    con.setRequestMethod("GET");
+                    con.setRequestProperty("Content-Type", "application/json");
+
+                    int responseCode = con.getResponseCode();
+                    if (responseCode == HttpURLConnection.HTTP_OK) {
+                        // 정상적인 응답일 때만 데이터를 읽어옴
+                        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                        String inputLine;
+                        StringBuilder response = new StringBuilder();
+
+                        // 응답 데이터 읽기
+                        while ((inputLine = in.readLine()) != null) {
+                            response.append(inputLine);
+                        }
+                        in.close();
+                        // JSON 데이터 파싱 및 리스트뷰에 추가
+                        //List<String> list = new ArrayList<>();
+                        JsonArray jsonArray = JsonParser.parseString(response.toString()).getAsJsonArray();
+                        for (int i = 0; i < jsonArray.size(); i++) {
+                            JsonObject scheduleObject = jsonArray.get(i).getAsJsonObject();
+                            String loationName = scheduleObject.get("name").getAsString();
+                            //list.add(loationName);
+                            LocationManager.incrementLocationVisitCount(context, loationName);
+                        }
+                    }
+
+                } catch (ProtocolException e) {
+                    throw new RuntimeException(e);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_schedule_weather);
         Intent intent = getIntent();
+        int FromAlarm = intent.getIntExtra("FromAlarm", 0);
         scheduleId = intent.getLongExtra("scheduleId", 0);
+        if(FromAlarm == 1){
+            increaseLocationCount(this, scheduleId);
+            Toast.makeText(this, "방문 횟수가 기록되었습니다.", Toast.LENGTH_LONG).show();
+
+        }
+
         back = findViewById(R.id.backhome);
         backbutton = findViewById(R.id.backbutton);
         recyclerView = findViewById(R.id.weatherList);
@@ -106,6 +167,22 @@ public class RouteActivity extends AppCompatActivity implements WeatherClickList
         loadingProgressBar.setVisibility(View.VISIBLE);
         detailWeather = new ArrayList<>();
         detailName = findViewById(R.id.name);
+        title = findViewById(R.id.title);
+        hash = findViewById(R.id.hash);
+        write = findViewById(R.id.write);
+
+        write.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(RouteActivity.this, ScheModifyActivity.class);
+                intent.putExtra("scheduleId", scheduleId);
+                intent.putExtra("title", temptitle);
+                intent.putExtra("hash", temphash);
+                startActivity(intent);
+
+                finish();
+            }
+        });
         close.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -185,6 +262,57 @@ public class RouteActivity extends AppCompatActivity implements WeatherClickList
     @Override
     protected void onResume() {
         super.onResume();
+        Schedule temp;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // JSON 형식으로 데이터 생성
+
+                    // HTTP 요청 보내기
+                    String url = "http://ec2-54-144-194-174.compute-1.amazonaws.com/schedule/title/"+scheduleId;
+
+                    URL obj = new URL(url);
+                    HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+                    // HTTP 요청 설정
+                    con.setRequestMethod("GET");
+                    con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+
+                    // 응답 받기
+                    int responseCode = con.getResponseCode();
+                    if (responseCode == HttpURLConnection.HTTP_OK) {
+                        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                        String inputLine;
+                        StringBuilder response = new StringBuilder();
+
+                        // 응답 데이터 읽기
+                        while ((inputLine = in.readLine()) != null) {
+                            response.append(inputLine);
+                        }
+                        in.close();
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        JsonNode rootNode = objectMapper.readTree(response.toString());
+                        temptitle = rootNode.get("title").asText();
+                        temphash = rootNode.get("hashTag").asText();
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                title.setText(temptitle);
+                                hash.setText(temphash);
+                            }
+                        });
+                    }
+                } catch (
+                        Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).
+
+                start();
+
         LoadData();
 
     }
@@ -286,8 +414,10 @@ public class RouteActivity extends AppCompatActivity implements WeatherClickList
                                 LocalDateTime now = LocalDateTime.now();
                                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
                                 LocalDateTime dateTime = LocalDateTime.parse(location.getTime(), formatter);
+
                                 Duration duration = Duration.between(now, dateTime);
                                 long daysDifference = duration.toDays(); // Day 차이
+
                                 Weather weatherItem = new Weather();
                                 weatherItem.setIndex(index);
                                 weatherItem.setLocation(location.getName());
@@ -295,7 +425,7 @@ public class RouteActivity extends AppCompatActivity implements WeatherClickList
                                         "일 " + dateTime.format(DateTimeFormatter.ofPattern("ddHHmm")).substring(2, 4) +
                                         "시 " + dateTime.format(DateTimeFormatter.ofPattern("ddHHmm")).substring(4, 6) +
                                         "분");
-
+                                dateTime = dateTime.plusHours(1);
                                 if (dateTime.isAfter(now)) {
                                     if (daysDifference >= 0 && daysDifference <= 2) {
                                         ShortTermForeacast weather_f = new ShortTermForeacast(weatherLocation);
@@ -342,7 +472,7 @@ public class RouteActivity extends AppCompatActivity implements WeatherClickList
                                                 weatherItem2.setType(0);
                                                 detailItem.weather.add(weatherItem2);
                                                 count++;
-                                                Log.d("aa", weather.tmp + "ºC");
+
                                                 tempWeather = String.valueOf(weather.fcst);
                                             } else {
                                                 break;

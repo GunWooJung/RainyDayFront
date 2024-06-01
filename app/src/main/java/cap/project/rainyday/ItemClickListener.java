@@ -14,4 +14,6 @@ public interface ItemClickListener {
     void deleteItemClick(Schedule item, int position);
 
     void onItemModify(Schedule item);
+
+    void onItemReview(Schedule item);
 }

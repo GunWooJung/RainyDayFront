@@ -10,6 +10,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.Toast;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -28,6 +29,8 @@ import cap.project.rainyday.model.User;
 import cap.project.rainyday.tool.LoginSharedPreferences;
 
 public class LoginActivity extends AppCompatActivity {
+
+    CheckBox checkBox;
 
     private void showLoginFailedDialog(String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -57,14 +60,18 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         }
-            setContentView(R.layout.activity_login);
-            // 로그인 버튼
-            Button button_login = findViewById(R.id.button_login);
-            TextInputLayout textInputLayout_id = findViewById(R.id.user_id_layout);
-            TextInputLayout textInputLayout_password = findViewById(R.id.user_password_layout);
-            // 로그인 입력 박스
-            TextInputEditText user_id = (TextInputEditText) textInputLayout_id.getEditText();
-            TextInputEditText user_password = (TextInputEditText) textInputLayout_password.getEditText();
+        setContentView(R.layout.activity_login);
+
+        // 로그인 버튼
+        Button button_login = findViewById(R.id.button_login);
+        TextInputLayout textInputLayout_id = findViewById(R.id.user_id_layout);
+        TextInputLayout textInputLayout_password = findViewById(R.id.user_password_layout);
+        // 로그인 입력 박스
+        TextInputEditText user_id = (TextInputEditText) textInputLayout_id.getEditText();
+        TextInputEditText user_password = (TextInputEditText) textInputLayout_password.getEditText();
+        checkBox = findViewById(R.id.checkBox);
+        checkBox.setChecked(true);
+        user_id.setText(LoginSharedPreferences.getLoginId(getApplicationContext()));
 
         button_login.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -75,6 +82,13 @@ public class LoginActivity extends AppCompatActivity {
                 if (TextUtils.isEmpty(id) || TextUtils.isEmpty(password)) {
                     showLoginFailedDialog("입력되지 않은 칸이 존재합니다.");
                     return;
+                }
+
+
+                if (checkBox.isChecked()) {
+                    LoginSharedPreferences.saveLoginrId(getApplicationContext(), id);
+                } else {
+                    LoginSharedPreferences.saveLoginrId(getApplicationContext(), "");
                 }
                 new Thread(new Runnable() {
                     @Override

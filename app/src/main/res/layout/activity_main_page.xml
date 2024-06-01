@@ -91,7 +91,7 @@
                     android:background="@android:color/transparent"
                     android:contentDescription="bell"
                     android:scaleType="fitCenter"
-                    app:srcCompat="@drawable/ic_bell" />
+                    app:srcCompat="@drawable/ic_bellon" />
 
                 <ImageButton
                     android:id="@+id/dots"
@@ -112,14 +112,14 @@
         <!-- 중앙 화면(프래그먼트) -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="70dp"
             android:gravity="right"
             android:orientation="horizontal">
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="100dp"
                 android:layout_height="match_parent"
-                android:layout_weight="0.5"
+                android:layout_weight="0.3"
                 android:orientation="horizontal">
 
                 <TextView
@@ -132,20 +132,48 @@
                     android:text="안녕하세요?"
                     android:textColor="@android:color/black"
                     android:textSize="14sp" />
+
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="300dp"
                 android:layout_height="match_parent"
-                android:gravity="right"
+                android:gravity="center|right"
                 android:orientation="horizontal">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/search_layout"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/search_sche"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="10dp"
+                        android:hint="일정 검색.." />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <ImageButton
+                    android:id="@+id/search"
+                    android:layout_width="40dp"
+                    android:layout_height="50dp"
+                    android:layout_marginEnd="10dp"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="backup"
+                    android:padding="5dp"
+                    android:scaleType="fitCenter"
+                    app:srcCompat="@drawable/ic_search"
+                    app:tint="#4B6275" />
+
 
                 <ImageButton
                     android:id="@+id/backup"
                     android:layout_width="40dp"
                     android:layout_height="50dp"
                     android:layout_marginEnd="10dp"
-                    android:layout_marginBottom="10dp"
                     android:background="@android:color/transparent"
                     android:contentDescription="backup"
                     android:scaleType="fitCenter"
@@ -156,7 +184,6 @@
                     android:id="@+id/sort"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:layout_marginTop="5dp"
                     android:layout_marginEnd="10dp"
                     android:background="@android:color/transparent"
                     android:contentDescription="sort"

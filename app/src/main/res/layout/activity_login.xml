@@ -86,6 +86,20 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- 로그인 버튼 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:orientation="horizontal">
+
+                <CheckBox
+                    android:id="@+id/checkBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="15dp"
+                    android:text="아이디 저장"
+                    android:textColor="#706767" />
+            </LinearLayout>
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_login"
                 android:layout_width="match_parent"
@@ -99,6 +113,7 @@
                 app:backgroundTint="#6E92FF" />
 
         </LinearLayout>
+
     </androidx.cardview.widget.CardView>
 
     <!-- 회원가입 관련 문구를 묶는 투명 박스 -->
