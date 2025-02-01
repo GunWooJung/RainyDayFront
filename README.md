@@ -44,4 +44,4 @@
 
 📌 **E-R 다이어그램**:
 
-![ERD](https://github.com/GunWooJung/READMEImage/blob/main/erd.png)
+![ERD](https://github.com/GunWooJung/READMEImage/blob/main/rainydayerd.jpg)
