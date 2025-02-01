@@ -16,7 +16,7 @@
 ## 📄 기술 스택
 
 - **클라이언트 개발**: Java, Android Stdio
-- **백엔드**: Spring Boot, MySQL, AWS
+- **백엔드**: Spring Boot, MySQL, JPA, AWS
 - **API**: 기상청 OpenAPI, 네이버 지도 API, Google Directio API
 ---
 
