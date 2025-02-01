@@ -34,13 +34,14 @@
 
 ## 🏗️ 시스템 아키텍처
 
-![시스템 아키텍처](https://github.com/GunWooJung/READMEImage/blob/main/30ticket.JPG)
+![시스템 아키텍처](https://github.com/GunWooJung/READMEImage/blob/main/rainydaysystem.JPG)
 
 ---
 
 ## 📺 시연 영상 및 문서
 
 📌 **시연 영상**: [YouTube 링크](https://youtu.be/A51GNjRFSCw?si=Jbqzho_C7b90Wy97)
+
 📌 **E-R 다이어그램**:
 
 ![ERD](https://github.com/GunWooJung/READMEImage/blob/main/erd.png)
