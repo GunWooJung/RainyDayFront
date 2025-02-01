@@ -3,7 +3,7 @@
 📍 **이동 경로 기반 날씨 조회 서비스**
 
 
-![스크린샷](https://github.com/GunWooJung/READMEImage/blob/main/30ticketadmin.jpg)
+![스크린샷](https://github.com/GunWooJung/READMEImage/blob/main/rainyday.jpg)
 
 기존의 주소 기반 이동 경로 관리 서비스는 많지만, 사용자는 별도로 날씨를 조회해야 하는 번거로움이 있다. 이 서비스는 사용자의 이동 경로에 맞춰 해당 위치와 시간대의 날씨를 실시간으로 제공하여 편리한 일정 관리를 돕는다.
 
