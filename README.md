@@ -34,7 +34,7 @@
 
 ## 🏗️ 시스템 아키텍처
 
-![시스템 아키텍처](https://github.com/GunWooJung/READMEImage/blob/main/rainydaysystem.JPG)
+![시스템 아키텍처](https://github.com/GunWooJung/READMEImage/blob/main/rainydaysystem.jpg)
 
 ---
 
